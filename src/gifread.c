@@ -163,7 +163,7 @@ value dGifOpenFileName( value name )
   CAMLreturn(res);
 } 
 
-value dGifCloseFile( value hdl )
+void dGifCloseFile( value hdl )
 {
   CAMLparam1(hdl);
 
@@ -213,7 +213,7 @@ value dGifGetLine( value hdl )
   }
   buf = alloc_string( GifFile->Image.Width * sizeof(GifPixelType) ); 
 
-  if( DGifGetLine(GifFile, String_val(buf), GifFile->Image.Width ) 
+  if( DGifGetLine(GifFile, (unsigned char*)String_val(buf), GifFile->Image.Width ) 
       == GIF_ERROR ){
     // PrintGifError ();
     failwith("DGifGetLine");

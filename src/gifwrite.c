@@ -111,7 +111,7 @@ void eGifCloseFile( value hdl )
   CAMLreturn0;
 }
 
-value eGifPutScreenDesc( value oc, value sdesc )
+void eGifPutScreenDesc( value oc, value sdesc )
 {
   CAMLparam2(oc,sdesc);
 
@@ -127,7 +127,7 @@ value eGifPutScreenDesc( value oc, value sdesc )
   CAMLreturn0;
 }
 
-value eGifPutImageDesc( value oc, value idesc )
+void eGifPutImageDesc( value oc, value idesc )
 {
   CAMLparam2(oc,idesc);
 
@@ -144,13 +144,13 @@ value eGifPutImageDesc( value oc, value idesc )
   CAMLreturn0;
 }
 
-value eGifPutLine( value oc, value buf )
+void eGifPutLine( value oc, value buf )
 {
   CAMLparam2(oc,buf);
 
   GifFileType *GifFileOut = (GifFileType*) oc;
 
-  if ( EGifPutLine(GifFileOut, String_val(buf), GifFileOut->Image.Width) 
+  if ( EGifPutLine(GifFileOut, (unsigned char*)String_val(buf), GifFileOut->Image.Width) 
        == GIF_ERROR ){
     // PrintGifError ();
     failwith("EGifPutLine");
@@ -158,7 +158,7 @@ value eGifPutLine( value oc, value buf )
   CAMLreturn0;
 }
 
-value eGifPutExtension( value oc, value ext )
+void eGifPutExtension( value oc, value ext )
 {
   CAMLparam2(oc,ext);
   CAMLlocal1(l);
