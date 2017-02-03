@@ -1,3 +1,8 @@
+4.2.3
+	- compilation fix for homebrew
+	- compilation fix when there is no supported subpackages which
+	  require external libraries
+
 4.2.2
         * Added some documents to mli files
 	* Fixed memory leaks in ftintf.c. Thanks to Max Mouratov!   
