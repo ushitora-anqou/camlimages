@@ -157,6 +157,7 @@ FILES_ps[]=
 FILES_supported=
   foreach(p, $(SUPPORTED_FORMATS))
     value $(getvar FILES_$(p))
+FILES_supported+=dummy_supported
 
 FILES_all_formats=
   foreach(p, $(FORMATS))
