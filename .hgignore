@@ -41,3 +41,4 @@ examples/tiffps/tiffps$
 examples/ttfimg/ttfimg$
 
 \.svn/
+opam/generated
