@@ -59,7 +59,7 @@ external dGifGetRecordType : in_channel -> record_type
     = "dGifGetRecordType"
 external dGifGetImageDesc : in_channel -> gif_desc
     = "dGifGetImageDesc"
-external dGifGetLine : in_channel -> string
+external dGifGetLine : in_channel -> bytes
     = "dGifGetLine"
 external dGifGetExtension : in_channel -> int * string list (* reversed!!! *)
     = "dGifGetExtension"
@@ -72,7 +72,7 @@ external eGifPutScreenDesc : out_channel -> screen_info -> unit
     = "eGifPutScreenDesc"
 external eGifPutImageDesc : out_channel -> gif_desc -> unit
     = "eGifPutImageDesc"
-external eGifPutLine : out_channel -> string -> unit
+external eGifPutLine : out_channel -> bytes -> unit
     = "eGifPutLine"
 external eGifPutExtension : out_channel -> int * string list -> unit
     = "eGifPutExtension"
@@ -352,12 +352,12 @@ let save filename opts sequence =
       Bytes.unsafe_set str 1 @@ char_of_int (sequence.loops mod 256);
       Bytes.unsafe_set str 2 @@ char_of_int (sequence.loops / 256);
       eGifPutExtension oc
-        (gif_make_extension (GifApplication ["NETSCAPE2.0"; str]));
+        (gif_make_extension (GifApplication ["NETSCAPE2.0"; Bytes.to_string str]));
       loop_written := true
     end;
 
     List.iter (fun frame ->
-      let graphics_ext = ref None in
+      let graphics_ext : bytes option ref = ref None in
       List.iter
         (fun ext ->
            debug_endline "SEXT";
@@ -368,7 +368,7 @@ let save filename opts sequence =
                  if !loop_written then raise Exit
              | GifGraphics [str] ->
                  (* delayed *)
-                 graphics_ext := Some str; raise Exit
+                 graphics_ext := Some (Bytes.of_string str); raise Exit
              | _ -> ()
              end;
              eGifPutExtension oc (gif_make_extension ext)
@@ -385,17 +385,17 @@ let save filename opts sequence =
         let str =
           match !graphics_ext with
           | Some str -> str
-          | None -> String.make 4 '\000' in
+          | None -> Bytes.make 4 '\000' in
         if frame.frame_bitmap.transparent <> -1 then begin
-          str << 0 & char_of_int (int_of_char str.[0] lor 0x01);
+          str << 0 & char_of_int (int_of_char (Bytes.get str 0) lor 0x01);
           str << 3 & char_of_int frame.frame_bitmap.transparent
         end else begin
-          str << 0 & char_of_int (int_of_char str.[0] land 0xfe);
+          str << 0 & char_of_int (int_of_char (Bytes.get str 0) land 0xfe);
           str << 3 & '\000'
         end;
         str << 1 & char_of_int (frame.frame_delay mod 256);
         str << 2 & char_of_int (frame.frame_delay / 256);
-        eGifPutExtension oc (gif_make_extension (GifGraphics [str]))
+        eGifPutExtension oc (gif_make_extension (GifGraphics [Bytes.to_string str]))
       end;
 
       let bmp = frame.frame_bitmap in
@@ -461,10 +461,10 @@ let check_header filename =
     let str = Bytes.create len in
     really_input ic str 0 len;
     close_in ic;
-    match String.sub str 0 6 with
+    match Bytes.sub_string str 0 6 with
     | "GIF87a" | "GIF89a" -> {
-         header_width = int_of_char str.[6] + int_of_char str.[7] * 256;
-         header_height = int_of_char str.[8] + int_of_char str.[9] * 256;
+         header_width = int_of_char (Bytes.get str 6) + int_of_char (Bytes.get str 7) * 256;
+         header_height = int_of_char (Bytes.get str 8) + int_of_char (Bytes.get str 9) * 256;
          header_infos = [];
        }
     | _ -> raise Wrong_file_type

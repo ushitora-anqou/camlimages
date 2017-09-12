@@ -33,7 +33,7 @@ type bmp = {
   bmpFileHeader : bitmapfileheader;           (* Bytes <0  14< *)
   bmpInfoHeader : bitmapinfoheader;           (* Bytes <14 54< *)
   bmpRgbQuad : rgb array;                     (* Bytes <54 ... *)
-  bmpBytes : string;                          (* Bytes <bfOffBits ... *)
+  bmpBytes : bytes;                          (* Bytes <bfOffBits ... *)
 }
 
 and bitmapfileheader = {
@@ -412,7 +412,7 @@ let load_image4data bih ic =
 
 
 let load_image24data bih ic =
-  (* Bitmap is a string of RGB bytes *)
+  (* Bitmap is a bytes of RGB bytes *)
   let bitmap = Bytes.create ((bih.biWidth * bih.biHeight) * 3) in
   let pad = (4 - ((bih.biWidth * 3) mod 4)) land 0x03 in
   let pp = ref 0 in
@@ -430,7 +430,7 @@ let load_image24data bih ic =
 
 
 let load_image32data bih ic =
-  (* Bitmap is a string of RGB bytes *)
+  (* Bitmap is a bytes of RGB bytes *)
   let bitmap = Bytes.create ((bih.biWidth * bih.biHeight) * 4) in
 (*
   let pad = (4 - ((bih.biWidth * 4) mod 4)) land 0x03 in
@@ -693,7 +693,7 @@ let write_image1data bmp oc =
    if count = 8 then begin
      write_byte oc accu;
      if x <= lim then write_line x 0 0 end else
-   let cur = bitmap.[x] in
+   let cur = Bytes.get bitmap x in
    let chunk = Char.code cur lsl (7 - count) in
    let new_accu = chunk + accu in
    if x = lim then write_byte oc new_accu
@@ -725,9 +725,9 @@ let write_image24data bmp oc =
   let start = i * width * 3 in
   let lim = (i + 1) * width * 3 - 1 in
   let rec write_line x =
-   write_byte oc (Char.code bitmap.[x + 2]);   (* Blue *)
-   write_byte oc (Char.code bitmap.[x + 1]);   (* Green *)
-   write_byte oc (Char.code bitmap.[x]);       (* Red *)
+   write_byte oc (Char.code (Bytes.get bitmap (x + 2)));   (* Blue *)
+   write_byte oc (Char.code (Bytes.get bitmap (x + 1)));   (* Green *)
+   write_byte oc (Char.code (Bytes.get bitmap (x    )));   (* Red *)
    let new_x = x + 3 in
    if new_x < lim then write_line new_x in
 
@@ -759,10 +759,10 @@ let write_image32data bmp oc =
     let start = i * width * 3 in
     let lim = (i + 1) * width * 4 - 1 in
     let rec write_line x =
-      write_byte oc (Char.code bitmap.[x + 3]);   (* Alpha *)
-      write_byte oc (Char.code bitmap.[x + 2]);   (* Blue *)
-      write_byte oc (Char.code bitmap.[x + 1]);   (* Green *)
-      write_byte oc (Char.code bitmap.[x]);       (* Red *)
+      write_byte oc (Char.code (Bytes.get bitmap (x + 3)));   (* Alpha *)
+      write_byte oc (Char.code (Bytes.get bitmap (x + 2)));   (* Blue *)
+      write_byte oc (Char.code (Bytes.get bitmap (x + 1)));   (* Green *)
+      write_byte oc (Char.code (Bytes.get bitmap (x    )));       (* Red *)
       let new_x = x + 4 in
       if new_x < lim then write_line new_x in
 
@@ -799,7 +799,7 @@ let write_image4data bmp oc =
       if count = 2 then begin
        write_byte oc accu;
        if x <= lim then write_line x 0 0 end else
-      let cur = bitmap.[x] in
+      let cur = Bytes.get bitmap x in
       let chunk = Char.code cur lsl (4 - count) in
       let new_accu = chunk + accu in
       if x = lim then write_byte oc new_accu
@@ -824,7 +824,7 @@ let write_image4data bmp oc =
      let start = i * width in
      let lim = (i + 1) * width - 1 in
      let rec write_line x count pred =
-      let cur = bitmap.[x] in
+      let cur = Bytes.get bitmap x in
       if cur = pred then
        if x = lim then write_rle4 oc (count + 1) pred
        else write_line (x + 1) (count + 1) pred
@@ -833,7 +833,7 @@ let write_image4data bmp oc =
        if x = lim then write_rle4 oc 1 cur
        else write_line (x + 1) 1 cur
       end in
-     write_line start 0 bitmap.[start];
+     write_line start 0 (Bytes.get bitmap start);
      write_end_of_scan_line oc;
      (* No padding in this mode *)
     done;
@@ -863,7 +863,7 @@ let write_image8data bmp oc =
      let start = i * width in
      let lim = (i + 1) * width - 1 in
      let rec write_line x =
-      let cur = bitmap.[x] in
+      let cur = Bytes.get bitmap x in
       write_byte oc (Char.code cur);
       if x < lim then write_line (x + 1) in
 
@@ -886,7 +886,7 @@ let write_image8data bmp oc =
      let start = i * width in
      let lim = (i + 1) * width - 1 in
      let rec write_line x count pred =
-      let cur = bitmap.[x] in
+      let cur = Bytes.get bitmap x in
       if cur = pred then
        if x = lim then write_rle oc (count + 1) pred
        else write_line (x + 1) (count + 1) pred
@@ -895,7 +895,7 @@ let write_image8data bmp oc =
        if x = lim then write_rle oc 1 cur
        else write_line (x + 1) 1 cur
       end in
-     write_line start 0 bitmap.[start];
+     write_line start 0 (Bytes.get bitmap start);
      write_end_of_scan_line oc;
      (* No padding in this mode *)
     done;

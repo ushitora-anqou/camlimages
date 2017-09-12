@@ -20,8 +20,8 @@ module E = struct
   type t = int
   let bytes_per_pixel = 2
   let get str pos =
-    int_of_char str.[pos    ] * 256 +
-    int_of_char str.[pos + 1]
+    int_of_char (Bytes.get str (pos    )) * 256 +
+    int_of_char (Bytes.get str (pos + 1))
   let set str pos t =
     str << pos     & char_of_int (t / 256);
     str << pos + 1 & char_of_int (t mod 256)

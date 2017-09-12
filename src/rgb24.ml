@@ -21,9 +21,9 @@ module E = struct
   type t = Color.rgb
   let bytes_per_pixel = 3
   let get str pos =
-    { r = int_of_char str.[pos    ];
-      g = int_of_char str.[pos + 1];
-      b = int_of_char str.[pos + 2] }
+    { r = int_of_char (Bytes.get str (pos    ));
+      g = int_of_char (Bytes.get str (pos + 1));
+      b = int_of_char (Bytes.get str (pos + 2)) }
   let set str pos t =
     str << pos     & char_of_int t.r;
     str << pos + 1 & char_of_int t.g;

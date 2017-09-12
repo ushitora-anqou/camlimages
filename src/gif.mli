@@ -89,12 +89,12 @@ val dGifOpenFileName : string -> screen_info * in_channel
 val dGifCloseFile : in_channel -> unit
 val dGifGetRecordType : in_channel -> record_type
 val dGifGetImageDesc : in_channel -> gif_desc
-val dGifGetLine : in_channel -> string
+val dGifGetLine : in_channel -> bytes
 val dGifGetExtension : in_channel -> int * string list
 
 val eGifOpenFileName : string -> out_channel
 val eGifCloseFile : out_channel -> unit
 val eGifPutScreenDesc : out_channel ->screen_info -> unit
 val eGifPutImageDesc : out_channel -> gif_desc -> unit
-val eGifPutLine : out_channel -> string -> unit
+val eGifPutLine : out_channel -> bytes -> unit
 val eGifPutExtension : out_channel -> int * string list -> unit

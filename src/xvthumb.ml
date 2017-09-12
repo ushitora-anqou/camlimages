@@ -22,7 +22,7 @@ let read_id ic =
   let buf = Bytes.create 7 in
   try
     really_input ic buf 0 7;
-    if buf = "P7 332\n" then ()
+    if Bytes.to_string buf = "P7 332\n" then ()
     else begin
       prerr_endline "wrong header id";
       raise Wrong_image_type

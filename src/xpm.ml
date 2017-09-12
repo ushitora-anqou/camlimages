@@ -52,7 +52,7 @@ let check_header filename =
     let str = Bytes.create len in
     really_input ic str 0 len;
     close_in ic;
-    if str = "/* XPM */" then
+    if Bytes.to_string str = "/* XPM */" then
       { header_width = -1;
     	header_height = -1;
     	header_infos = []; }

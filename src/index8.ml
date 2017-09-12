@@ -20,7 +20,7 @@ module E = struct
   type t = int
   let bytes_per_pixel = 1
   let get str pos =
-    int_of_char str.[pos]
+    int_of_char (Bytes.get str pos)
   let set str pos t =
     str << pos & char_of_int t
   let make t =

@@ -22,7 +22,7 @@ let maximum_block_size = ref (!maximum_live / 10) (* default 300K words *)
 (* see Temp to set temp file directory *)
 
 type block_data =
-   | InMemory of string
+   | InMemory of bytes
    | Swapped
    | Destroyed
 
@@ -38,7 +38,7 @@ type block = {
 let swappable_blocks = ref []
 
 (* wrapped Bytes.create *)
-let string_create s =
+let bytes_create s =
   try Bytes.create s with Invalid_argument _ -> raise Out_of_memory
 
 module Block = struct
@@ -47,7 +47,7 @@ module Block = struct
     height : int;
     x : int;
     y : int;
-    dump : string;
+    dump : bytes;
   }
 end
 
@@ -69,7 +69,7 @@ module Make(B:Bitdepth) = struct
     blocks_x : int;
     blocks_y : int;
     data : block array array;
-    access : int -> int -> (string * int);
+    access : int -> int -> (bytes * int);
     }
 
   (****************************************************************************)
@@ -94,26 +94,26 @@ module Make(B:Bitdepth) = struct
            if blk == blk' then st else blk' :: st)
         !swappable_blocks []
 
-  let fill_string buf init =
-    (* fill string with init quickly (hopefully) *)
-    let fulllength = String.length buf in
+  let fill_bytes buf init =
+    (* fill bytes with init quickly (hopefully) *)
+    let fulllength = Bytes.length buf in
     let halflength = fulllength / 2 in
     let rec sub = function
       | 0 ->
-        let len = String.length init in
-        String.unsafe_blit init 0 buf 0 len;
+        let len = Bytes.length init in
+        Bytes.unsafe_blit init 0 buf 0 len;
         sub len
       | x when x <= halflength ->
-        String.unsafe_blit buf 0 buf x x;
+        Bytes.unsafe_blit buf 0 buf x x;
         sub (x * 2)
       | x (* when x > halflength *) ->
-        String.unsafe_blit buf 0 buf x (fulllength - x) in
+        Bytes.unsafe_blit buf 0 buf x (fulllength - x) in
     sub 0
 
   let check_init init =
     match init with
     | Some v ->
-        if String.length v <> bytes_per_pixel
+        if Bytes.length v <> bytes_per_pixel
         then failwith "bitmap fill value is incorrect"
     | None -> ()
 
@@ -122,12 +122,12 @@ module Make(B:Bitdepth) = struct
 
     check_init init;
 
-    (* we can have hsize lines at maximum in one string *)
+    (* we can have hsize lines at maximum in one bytes *)
     let hsize = Sys.max_string_length / (width * bytes_per_pixel) in 
     
     let hsize = min height hsize in
 
-    (* how many caml strings required? *)
+    (* how many caml bytess required? *)
     let blocks_y = (height - 1) / hsize + 1 in
     let buf_size_heights =
       Array.init blocks_y (fun by -> 
@@ -139,11 +139,11 @@ module Make(B:Bitdepth) = struct
 	in
 	(* CR jfuruse: check overflow *)
  	let size = width * height * bytes_per_pixel in
-	string_create size, size, height)
+	bytes_create size, size, height)
     in
     let bufs = Array.map (fun (buf, _, _) -> buf) buf_size_heights in
     begin match init with
-    | Some v -> Array.iter (fun s -> fill_string s v) bufs;
+    | Some v -> Array.iter (fun s -> fill_bytes s v) bufs;
     | None -> ()
     end;
     { width = width;
@@ -215,7 +215,7 @@ module Make(B:Bitdepth) = struct
           debugs ("swap in "^fname);
           require size;
           let ic = open_in_bin fname in
-          let s = string_create size in
+          let s = bytes_create size in
           really_input ic s 0 size;
           close_in ic;
           blk.block_data <- InMemory s;
@@ -233,9 +233,9 @@ module Make(B:Bitdepth) = struct
     (* CR jfuruse: check overflow *)
     let size = bytes_per_pixel * width * height in
     require size;
-    let s = string_create size in
+    let s = bytes_create size in
     begin match init with
-    | Some v -> fill_string s v
+    | Some v -> fill_bytes s v
     | None -> ()
     end;
     let blk =
@@ -273,7 +273,7 @@ module Make(B:Bitdepth) = struct
               height / p + (if height mod p <> 0 then 1 else 0) in
         try
 	  (* CR jfuruse: check overflow *)
-          p, string_create
+          p, bytes_create
                (block_size_width * block_size_height * bytes_per_pixel)
         with
         | Out_of_memory -> alloc_test_block (p + 1) in
@@ -365,9 +365,9 @@ module Make(B:Bitdepth) = struct
       assert false
     end;
     for y = 0 to height - 1 do
-      if String.length scanlines.(y) <> block_size then begin
+      if Bytes.length scanlines.(y) <> block_size then begin
 	Format.eprintf "scanline error %d = block_size %d = %d * %d (y=%d)@."
-	  (String.length scanlines.(y))
+	  (Bytes.length scanlines.(y))
 	  block_size
 	  width
 	  bytes_per_pixel
@@ -412,13 +412,13 @@ module Make(B:Bitdepth) = struct
       let src = swap_in blk in
       let size = w * bytes_per_pixel in
       let adrs = (blk.block_width * y' + x) * bytes_per_pixel in
-      let str = string_create size in
-      String.unsafe_blit src adrs str 0 size;
+      let str = bytes_create size in
+      Bytes.unsafe_blit src adrs str 0 size;
       str
     | _, _ ->
       let bly = y / t.block_size_height in
       let y' = y mod t.block_size_height in
-      let str = string_create (w * bytes_per_pixel) in
+      let str = bytes_create (w * bytes_per_pixel) in
       let blx_start = x / t.block_size_width in
       let blx_last = (x + w - 1) / t.block_size_width in
       for blx = blx_start to blx_last do
@@ -435,7 +435,7 @@ module Make(B:Bitdepth) = struct
         let offset =
           if blx = blx_start then 0
           else (t.block_size_width * blx - x) * bytes_per_pixel in
-        String.unsafe_blit src adrs str offset size
+        Bytes.unsafe_blit src adrs str offset size
       done;
       str
 
@@ -450,7 +450,7 @@ module Make(B:Bitdepth) = struct
       let dst = swap_in blk in
       let size = w * bytes_per_pixel in
       let adrs = (blk.block_width * y' + x) * bytes_per_pixel in
-      String.unsafe_blit str 0 dst adrs size
+      Bytes.unsafe_blit str 0 dst adrs size
     | _, _ ->
       let bly = y / t.block_size_height in
       let y' = y mod t.block_size_height in
@@ -472,7 +472,7 @@ module Make(B:Bitdepth) = struct
           if blx = blx_start then 0
           else (t.block_size_width * blx - x) * bytes_per_pixel
         in
-        String.unsafe_blit str offset dst adrs size
+        Bytes.unsafe_blit str offset dst adrs size
       done
 
   (* scanline access (special case of strip access) *)
@@ -499,10 +499,10 @@ module Make(B:Bitdepth) = struct
 
   let set_scanline t y str =
     (* CR jfuruse: check overflow *)
-    if String.length str <> t.width * B.bytes_per_pixel then
+    if Bytes.length str <> t.width * B.bytes_per_pixel then
       failwith
         (Printf.sprintf "scan=%d width=%d bbp=%d"
-           (String.length str) t.width B.bytes_per_pixel);
+           (Bytes.length str) t.width B.bytes_per_pixel);
     set_strip t 0 y t.width str
 
   (* dump : of course this does not work for large images *)
@@ -513,22 +513,22 @@ module Make(B:Bitdepth) = struct
     match t.blocks_x, t.blocks_y with
     | 1, 1 -> swap_in t.data.(0).(0)
     | 1, h ->
-      let s = string_create size in
+      let s = bytes_create size in
       let scanline_size = bytes_per_pixel * t.width in
       for y = 0 to h - 1 do
         let str = swap_in t.data.(0).(y) in
-        String.unsafe_blit str 0 s (scanline_size * y) scanline_size
+        Bytes.unsafe_blit str 0 s (scanline_size * y) scanline_size
       done;
       s
     | w, h ->
-      let s = string_create size in
+      let s = bytes_create size in
       for x = 0 to w - 1 do
         for y = 0 to h - 1 do
           let blk = t.data.(x).(y) in
           let str = swap_in blk in
           let scanline_size = bytes_per_pixel * blk.block_width in
           for i = 0 to blk.block_height - 1 do
-            String.unsafe_blit str (scanline_size * i)
+            Bytes.unsafe_blit str (scanline_size * i)
               s (((y * t.block_size_height + i) * t.width +
                     x * t.block_size_width) * bytes_per_pixel)
               scanline_size

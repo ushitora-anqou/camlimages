@@ -299,7 +299,7 @@ let super_save file conf comments showpage images =
               function x ->
                 let adrs = x * 3 in
                 for i = 0 to 2 do
-                  p_ (sprintf "%02x" (Char.code buf.[adrs+i]))
+                  p_ (sprintf "%02x" (Char.code (Bytes.get buf (adrs+i))))
                 done
             else
               let mono r g b =
@@ -308,9 +308,9 @@ let super_save file conf comments showpage images =
                 let adrs = x * 3 in
                 let m =
                   mono
-                   (Char.code buf.[adrs])
-                   (Char.code buf.[adrs + 1])
-                   (Char.code buf.[adrs + 2]) in
+                   (Char.code (Bytes.get buf (adrs    )))
+                   (Char.code (Bytes.get buf (adrs + 1)))
+                   (Char.code (Bytes.get buf (adrs + 2))) in
                 for _i = 0 to 2 do
                   p_ (sprintf "%02x" m)
                 done in

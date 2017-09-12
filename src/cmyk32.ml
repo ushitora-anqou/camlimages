@@ -23,10 +23,10 @@ module E = struct
   type t = Color.cmyk
   let bytes_per_pixel = 4
   let get str pos =
-    { c = int_of_char str.[pos    ];
-      m = int_of_char str.[pos + 1];
-      y = int_of_char str.[pos + 2];
-      k = int_of_char str.[pos + 3]; }
+    { c = int_of_char (Bytes.get str (pos    ));
+      m = int_of_char (Bytes.get str (pos + 1));
+      y = int_of_char (Bytes.get str (pos + 2));
+      k = int_of_char (Bytes.get str (pos + 3)); }
   let set str pos t =
     str << pos     & char_of_int t.c;
     str << pos + 1 & char_of_int t.m;

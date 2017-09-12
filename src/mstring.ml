@@ -93,7 +93,7 @@ let dec_to_hex i =
 (* Converting a hex stored string *)
 let hex_to_string s =
   let len = String.length s / 2 in
-  Bytes.init len @@ fun i -> 
+  String.init len @@ fun i -> 
     char_of_int ( 16 * (hex_to_dec s.[i + i]) + hex_to_dec s.[i + i + 1])
 
 
@@ -150,7 +150,7 @@ let norm_crlf lastwascr buf offs len =
   | '\r' -> lastiscr := true
   | c -> dest << !wpos & c; incr wpos
   end;
-  String.sub dest 0 !wpos, !lastiscr
+  Bytes.sub_string dest 0 !wpos, !lastiscr
 
 let hexchar c =
   let i = int_of_char c in

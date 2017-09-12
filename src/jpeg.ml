@@ -51,9 +51,9 @@ external set_scale_denom : in_handle -> int -> unit
     = "jpeg_set_scale_denom"
 external open_in_start : in_handle -> int * int * in_handle
     = "open_jpeg_file_for_read_start"
-external read_scanline : in_handle -> string -> int -> unit
+external read_scanline : in_handle -> bytes -> int -> unit
     = "read_jpeg_scanline"
-external read_scanlines : in_handle -> string -> int -> int -> unit
+external read_scanlines : in_handle -> bytes -> int -> int -> unit
     = "read_jpeg_scanlines"
 external close_in : in_handle -> unit
     = "close_jpeg_file_for_read"
@@ -66,7 +66,7 @@ external open_out_cmyk : string -> int -> int -> int -> out_handle
     = "open_jpeg_file_for_write_cmyk"
 external write_marker : out_handle -> Marker.raw -> unit 
   = "caml_jpeg_write_marker"
-external write_scanline : out_handle -> string -> unit
+external write_scanline : out_handle -> bytes -> unit
     = "write_jpeg_scanline"
 external close_out : out_handle -> unit
     = "close_jpeg_file_for_write"
@@ -171,9 +171,9 @@ let save_as_cmyk name opts trans image =
   let get_cmyk_scanline width scanline =
     let buf = Bytes.create (width * 4) in
     for x = 0 to width - 1 do
-      let r = int_of_char scanline.[x * 3 + 0] in
-      let g = int_of_char scanline.[x * 3 + 1] in
-      let b = int_of_char scanline.[x * 3 + 2] in
+      let r = int_of_char (Bytes.get scanline (x * 3 + 0)) in
+      let g = int_of_char (Bytes.get scanline (x * 3 + 1)) in
+      let b = int_of_char (Bytes.get scanline (x * 3 + 2)) in
       let c, m, y, k = trans {r = r; g = g; b = b} in
       buf << x * 4 + 0 & char_of_int (255 - c);
       buf << x * 4 + 1 & char_of_int (255 - m);
@@ -241,13 +241,13 @@ let find_jpeg_size ic =
     | _ when ch >= 0xc0 && ch <= 0xc3 ->
       really_input ic str 0 3;
       really_input ic str 0 4;
-      int_of_char str.[2] lsl 8 + int_of_char str.[3], (* width *)
-      int_of_char str.[0] lsl 8 + int_of_char str.[1]  (* height *)
+      int_of_char (Bytes.get str 2) lsl 8 + int_of_char (Bytes.get str 3), (* width *)
+      int_of_char (Bytes.get str 0) lsl 8 + int_of_char (Bytes.get str 1)  (* height *)
     | _ ->
       (* skip this block *)
       let blocklen =
         really_input ic str 0 2;
-        int_of_char str.[0] lsl 8 + int_of_char str.[1] in
+        int_of_char (Bytes.get str 0) lsl 8 + int_of_char (Bytes.get str 1) in
       let s = Bytes.create (blocklen - 2) in
       really_input ic s 0 (blocklen - 2);
       loop () in
@@ -264,7 +264,7 @@ let check_header filename =
       (* I had some jpeg started with 7f58, the 7th bits were missing... *)
       (* int_of_char str.[0] lor 0x80 = 0xff &&
          int_of_char str.[1] lor 0x80 = 0xd8 *)
-      int_of_char str.[0] = 0xff && int_of_char str.[1] = 0xd8
+      int_of_char (Bytes.get str 0) = 0xff && int_of_char (Bytes.get str 1) = 0xd8
       (* && String.sub str 6 4 = "JFIF" --- JFIF standard *) then begin
       let w, h =
         try find_jpeg_size ic with
