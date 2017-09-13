@@ -23,3 +23,6 @@ let range_check s from to_ =
     invalid_arg "index out of bounds"
 
 let (>@!) = Array.unsafe_get
+
+let (@%) s p = Char.code @@ Bytes.get s p
+

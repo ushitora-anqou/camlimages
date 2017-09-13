@@ -171,9 +171,9 @@ let save_as_cmyk name opts trans image =
   let get_cmyk_scanline width scanline =
     let buf = Bytes.create (width * 4) in
     for x = 0 to width - 1 do
-      let r = int_of_char (Bytes.get scanline (x * 3 + 0)) in
-      let g = int_of_char (Bytes.get scanline (x * 3 + 1)) in
-      let b = int_of_char (Bytes.get scanline (x * 3 + 2)) in
+      let r = scanline @% x * 3 + 0 in
+      let g = scanline @% x * 3 + 1 in
+      let b = scanline @% x * 3 + 2 in
       let c, m, y, k = trans {r = r; g = g; b = b} in
       buf << x * 4 + 0 & char_of_int (255 - c);
       buf << x * 4 + 1 & char_of_int (255 - m);
@@ -241,13 +241,13 @@ let find_jpeg_size ic =
     | _ when ch >= 0xc0 && ch <= 0xc3 ->
       really_input ic str 0 3;
       really_input ic str 0 4;
-      int_of_char (Bytes.get str 2) lsl 8 + int_of_char (Bytes.get str 3), (* width *)
-      int_of_char (Bytes.get str 0) lsl 8 + int_of_char (Bytes.get str 1)  (* height *)
+      (str @% 2) lsl 8 + (str @% 3), (* width *)
+      (str @% 0) lsl 8 + (str @% 1)  (* height *)
     | _ ->
       (* skip this block *)
       let blocklen =
         really_input ic str 0 2;
-        int_of_char (Bytes.get str 0) lsl 8 + int_of_char (Bytes.get str 1) in
+        (str @% 0) lsl 8 + (str @% 1) in
       let s = Bytes.create (blocklen - 2) in
       really_input ic s 0 (blocklen - 2);
       loop () in
@@ -264,7 +264,7 @@ let check_header filename =
       (* I had some jpeg started with 7f58, the 7th bits were missing... *)
       (* int_of_char str.[0] lor 0x80 = 0xff &&
          int_of_char str.[1] lor 0x80 = 0xd8 *)
-      int_of_char (Bytes.get str 0) = 0xff && int_of_char (Bytes.get str 1) = 0xd8
+      (str @% 0) = 0xff && (str @% 1) = 0xd8
       (* && String.sub str 6 4 = "JFIF" --- JFIF standard *) then begin
       let w, h =
         try find_jpeg_size ic with

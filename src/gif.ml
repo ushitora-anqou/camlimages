@@ -387,10 +387,10 @@ let save filename opts sequence =
           | Some str -> str
           | None -> Bytes.make 4 '\000' in
         if frame.frame_bitmap.transparent <> -1 then begin
-          str << 0 & char_of_int (int_of_char (Bytes.get str 0) lor 0x01);
+          str << 0 & char_of_int ((str @% 0) lor 0x01);
           str << 3 & char_of_int frame.frame_bitmap.transparent
         end else begin
-          str << 0 & char_of_int (int_of_char (Bytes.get str 0) land 0xfe);
+          str << 0 & char_of_int ((str @% 0) land 0xfe);
           str << 3 & '\000'
         end;
         str << 1 & char_of_int (frame.frame_delay mod 256);
@@ -463,8 +463,8 @@ let check_header filename =
     close_in ic;
     match Bytes.sub_string str 0 6 with
     | "GIF87a" | "GIF89a" -> {
-         header_width = int_of_char (Bytes.get str 6) + int_of_char (Bytes.get str 7) * 256;
-         header_height = int_of_char (Bytes.get str 8) + int_of_char (Bytes.get str 9) * 256;
+         header_width = (str @% 6) + (str @% 7) * 256;
+         header_height = (str @% 8) + (str @% 9) * 256;
          header_infos = [];
        }
     | _ -> raise Wrong_file_type

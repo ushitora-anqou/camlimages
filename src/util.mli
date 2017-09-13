@@ -36,3 +36,5 @@ val range_check : bytes -> int -> int -> unit
 val (>@!) : 'a array -> int -> 'a
 (** equivalent with [Array.unsafe.get] *)
 
+val (@%) : bytes -> int -> int
+(** s @% p = Char.code @@ Bytes.get s p *)

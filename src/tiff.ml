@@ -17,6 +17,7 @@
 
 open Images
 open Rgb24
+open Util
 
 type colormodel = RGB | CMYK | WHITEBLACK | BLACKWHITE
 
@@ -75,7 +76,7 @@ let load name opts =
 	  for x = 0 to w - 1 do
 	    let c = x lsr 3 in
 	    let b = x land 7 in
-	    if Char.code (Bytes.get buf c) land Array.unsafe_get bits b <> 0 then
+	    if (buf @% c) land Array.unsafe_get bits b <> 0 then
 	      Index8.unsafe_set img x y 1
 	  done
     | _ -> assert false in

@@ -693,8 +693,7 @@ let write_image1data bmp oc =
    if count = 8 then begin
      write_byte oc accu;
      if x <= lim then write_line x 0 0 end else
-   let cur = Bytes.get bitmap x in
-   let chunk = Char.code cur lsl (7 - count) in
+   let chunk = (bitmap @% x) lsl (7 - count) in
    let new_accu = chunk + accu in
    if x = lim then write_byte oc new_accu
    else write_line (x + 1) (count + 1) new_accu in
@@ -725,9 +724,9 @@ let write_image24data bmp oc =
   let start = i * width * 3 in
   let lim = (i + 1) * width * 3 - 1 in
   let rec write_line x =
-   write_byte oc (Char.code (Bytes.get bitmap (x + 2)));   (* Blue *)
-   write_byte oc (Char.code (Bytes.get bitmap (x + 1)));   (* Green *)
-   write_byte oc (Char.code (Bytes.get bitmap (x    )));   (* Red *)
+   write_byte oc (bitmap @% x + 2);   (* Blue *)
+   write_byte oc (bitmap @% x + 1);   (* Green *)
+   write_byte oc (bitmap @% x    );   (* Red *)
    let new_x = x + 3 in
    if new_x < lim then write_line new_x in
 
@@ -759,10 +758,10 @@ let write_image32data bmp oc =
     let start = i * width * 3 in
     let lim = (i + 1) * width * 4 - 1 in
     let rec write_line x =
-      write_byte oc (Char.code (Bytes.get bitmap (x + 3)));   (* Alpha *)
-      write_byte oc (Char.code (Bytes.get bitmap (x + 2)));   (* Blue *)
-      write_byte oc (Char.code (Bytes.get bitmap (x + 1)));   (* Green *)
-      write_byte oc (Char.code (Bytes.get bitmap (x    )));       (* Red *)
+      write_byte oc (bitmap @% x + 3);   (* Alpha *)
+      write_byte oc (bitmap @% x + 2);   (* Blue *)
+      write_byte oc (bitmap @% x + 1);   (* Green *)
+      write_byte oc (bitmap @% x    );       (* Red *)
       let new_x = x + 4 in
       if new_x < lim then write_line new_x in
 
@@ -799,8 +798,7 @@ let write_image4data bmp oc =
       if count = 2 then begin
        write_byte oc accu;
        if x <= lim then write_line x 0 0 end else
-      let cur = Bytes.get bitmap x in
-      let chunk = Char.code cur lsl (4 - count) in
+      let chunk = (bitmap @% x) lsl (4 - count) in
       let new_accu = chunk + accu in
       if x = lim then write_byte oc new_accu
       else write_line (x + 1) (count + 1) new_accu in
@@ -863,8 +861,7 @@ let write_image8data bmp oc =
      let start = i * width in
      let lim = (i + 1) * width - 1 in
      let rec write_line x =
-      let cur = Bytes.get bitmap x in
-      write_byte oc (Char.code cur);
+      write_byte oc (bitmap @% x);
       if x < lim then write_line (x + 1) in
 
      write_line start;

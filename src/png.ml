@@ -60,7 +60,7 @@ let load name _opts =
         for x = 0 to w - 1 do
           b << x &
             char_of_int
-              (let c = int_of_char (Bytes.get buf.(y) (x / 2)) in
+              (let c = buf.(y) @% (x / 2) in
                if x mod 2 = 0 then c lsr 4 else c mod 16)
         done
       done;
@@ -99,17 +99,17 @@ let check_header filename =
             header_infos= [Info_Corrupted]; }
       end else begin
           let belong str =
-            int_of_char (Bytes.get str 0) lsl 24 +
-            int_of_char (Bytes.get str 1) lsl 16 +
-            int_of_char (Bytes.get str 2) lsl 8 +
-            int_of_char (Bytes.get str 3) in
+            (str @% 0) lsl 24 +
+            (str @% 1) lsl 16 +
+            (str @% 2) lsl 8 +
+            (str @% 3) in
           let w = belong (Bytes.sub str 16 4) in
           let h = belong (Bytes.sub str 20 4) in
-          let bdepth = Info_Depth (int_of_char (Bytes.get str 12)) in
+          let bdepth = Info_Depth (str @% 12) in
           let infos =
             try
               let colormodel =
-                match int_of_char (Bytes.get str 13) with
+                match str @% 13 with
                 | 0 -> Info_ColorModel Gray
                 | 2 -> Info_ColorModel RGB
                 | 3 -> Info_ColorModel Index
