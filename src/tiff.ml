@@ -1,3 +1,4 @@
+
 (***********************************************************************)
 (*                                                                     *)
 (*                           Objective Caml                            *)
@@ -16,6 +17,7 @@
 
 open Images
 open Rgb24
+open Util
 
 type colormodel = RGB | CMYK | WHITEBLACK | BLACKWHITE
 
@@ -23,7 +25,7 @@ type in_handle
 
 external open_in : string -> int * int * float * colormodel * in_handle
     = "open_tiff_file_for_read"
-external read_scanline : in_handle -> string -> int -> unit
+external read_scanline : in_handle -> bytes -> int -> unit
     = "read_tiff_scanline"
 external close_in : in_handle -> unit
     = "close_tiff_file"
@@ -32,7 +34,7 @@ type out_handle
 
 external open_out : string -> int -> int -> float -> out_handle
     = "open_tiff_file_for_write"
-external write_scanline : out_handle -> string -> int -> unit
+external write_scanline : out_handle -> bytes -> int -> unit
     = "write_tiff_scanline"
 external close_out : out_handle -> unit
     = "close_tiff_file"
@@ -74,7 +76,7 @@ let load name opts =
 	  for x = 0 to w - 1 do
 	    let c = x lsr 3 in
 	    let b = x land 7 in
-	    if Char.code buf.[c] land Array.unsafe_get bits b <> 0 then
+	    if (buf @% c) land Array.unsafe_get bits b <> 0 then
 	      Index8.unsafe_set img x y 1
 	  done
     | _ -> assert false in
@@ -110,7 +112,7 @@ let check_header filename =
     let str = Bytes.create len in
     really_input ic str 0 len;
     Pervasives.close_in ic;
-    match str with
+    match Bytes.to_string str with
     | "MM\000\042" ->
       { header_width = -1;
   	header_height = -1;

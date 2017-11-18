@@ -14,6 +14,7 @@
 
 open Images
 open Rgb24
+open Util
 
 type bounding_box = (int * int * int * int) option
 
@@ -299,7 +300,7 @@ let super_save file conf comments showpage images =
               function x ->
                 let adrs = x * 3 in
                 for i = 0 to 2 do
-                  p_ (sprintf "%02x" (Char.code buf.[adrs+i]))
+                  p_ (sprintf "%02x" (buf @% adrs+i))
                 done
             else
               let mono r g b =
@@ -308,9 +309,9 @@ let super_save file conf comments showpage images =
                 let adrs = x * 3 in
                 let m =
                   mono
-                   (Char.code buf.[adrs])
-                   (Char.code buf.[adrs + 1])
-                   (Char.code buf.[adrs + 2]) in
+                   (buf @% adrs    )
+                   (buf @% adrs + 1)
+                   (buf @% adrs + 2) in
                 for _i = 0 to 2 do
                   p_ (sprintf "%02x" m)
                 done in

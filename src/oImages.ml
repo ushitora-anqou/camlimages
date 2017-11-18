@@ -36,7 +36,7 @@ class type ['a] map = object
   method unsafe_set : int -> int -> 'a -> unit
   method get : int -> int -> 'a
   method set : int -> int -> 'a -> unit
-  method unsafe_access : int -> int -> string * int
+  method unsafe_access : int -> int -> bytes * int
 end
 
 class type oimage = object
@@ -49,7 +49,7 @@ class type oimage = object
   method image : Images.t
 
   method destroy : unit
-  method dump : string
+  method dump : bytes
 
   method save : string -> format option -> save_option list -> unit
 
@@ -73,7 +73,7 @@ class virtual oimage_impl = object (self)
   method virtual set_infos : info list -> unit
 
   method virtual destroy : unit
-  method virtual dump : string
+  method virtual dump : bytes
 
   method virtual save : string -> format option -> save_option list -> unit
 
