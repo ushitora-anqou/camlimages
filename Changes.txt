@@ -1,3 +1,10 @@
+4.2.5
+        - Ported to lablgtk.2.8.16
+	- Added cmxs creation
+
+4.2.4
+        - -safe-string support
+
 4.2.3
 	- compilation fix for homebrew
 	- compilation fix when there is no supported subpackages which
