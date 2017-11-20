@@ -33,6 +33,10 @@ BuildExample(jpgmark, jpgmark, $(SUB_PACKAGES))
 OCAML_LIBS=
 BuildExample(jpgexif, jpgexif, $(SUB_PACKAGES))
 
+OCAMLPACKS=dynlink
+OCAML_LIBS=
+BuildExample(dyn, dyn, $(EMPTY))
+
 clean:
   rm -f $(filter-proper-targets $(ls R, .))
   rm -f out.image

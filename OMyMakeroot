@@ -188,6 +188,7 @@ SRCDIR = $(ROOT)/src
 Subpackages_available(packs) =
   sequence-forall($(fun elem, $(mem $(elem), core all_formats supported $(SUPPORTED_SUBPACKAGES))), $(packs))
 
+# BUG: OCAMLINCLUDES, OCAML_LIBS and OCAMLPACKS are accumulated by multiple calls of BuildExample()
 BuildExample(namex, modules, packages) = 
   .PHONY: clean
   if $(Subpackages_available $(packages))

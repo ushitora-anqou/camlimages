@@ -239,9 +239,10 @@ MakeLibOCaml(name) =
       default
         array()
     OCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
+    $(OCamlOpt) -shared -linkall -I . -o $(LIBRARY_PREFIX)_$(name).cmxs $(LIBRARY_PREFIX)_$(name).cmxa
 
   else # inpure
-    $(LIBRARY_PREFIX)_$(name).cma $(LIBRARY_PREFIX)_$(name).cmxa: $(MakeLibC $(name))
+    $(LIBRARY_PREFIX)_$(name).cma $(LIBRARY_PREFIX)_$(name).cmxa $(LIBRARY_PREFIX)_$(name).cmxs: $(MakeLibC $(name))
     # OCAML_{BYTE,NATIVE}_LINK_FLAGS do not work for OCamlLibrary
     # Bit dirty workaround
     OCAMLCFLAGS+=-dllib -l$(LIBRARY_PREFIX)_$(name) -cclib -l$(LIBRARY_PREFIX)_$(name)
@@ -250,6 +251,7 @@ MakeLibOCaml(name) =
     # is considered one option.
     OCAML_LIB_FLAGS=-linkall $(mapprefix -cclib, $(LDFLAGS) $(getvar LDFLAGS_$(name)))
     OCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
+    $(OCamlOpt) -shared -linkall -I . -o $(LIBRARY_PREFIX)_$(name).cmxs $(LIBRARY_PREFIX)_$(name).cmxa
 
 LIBRARIES=
   # CR jfurue: lablgtk2, freetype and graphics may not be buildable
@@ -278,6 +280,7 @@ INSTALL_TARGETS()=
       $(glob i, *.cma) \
       $(glob i, *.cmx) \
       $(glob i, *.cmxa) \
+      $(glob i, *.cmxs) \
       $(glob i, *.a) \
       $(glob i, *.so)
 
@@ -298,7 +301,7 @@ uninstall:
 
 # Author's personal thing
 if $(defined BIG_ROOT)
-    %.cmx %.cmo %.cmi %.cma %.cmxa %.annot %.spot %.spit: $(INSTALLED)/lablgtk2
+    %.cmx %.cmo %.cmi %.cma %.cmxa %.cmxs %.annot %.spot %.spit: $(INSTALLED)/lablgtk2
     $(INSTALLED)/camlimages: $(LIBRARIES) META
         $(touch_installed_md5 camlimages, $(INSTALL_TARGETS))
         $(UNINSTALL)
