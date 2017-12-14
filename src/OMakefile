@@ -218,6 +218,12 @@ MakeLibC(name) =
 
 ################################################################# ML BUILD RULE
 
+XOCamlLibrary(n, fs) = 
+  res=$(OCamlLibrary $(n), $(fs))
+  $(LIBRARY_PREFIX)_$(name).cmxs:   $(LIBRARY_PREFIX)_$(name).cmxa
+      $(OCamlOpt) -shared -linkall -I . -o $(LIBRARY_PREFIX)_$(name).cmxs $(LIBRARY_PREFIX)_$(name).cmxa
+  return $(array $(res) $(LIBRARY_PREFIX)_$(name).cmxs)
+
 MakeLibOCaml(name) =
 
   OCAMLPACKS=
@@ -238,8 +244,7 @@ MakeLibOCaml(name) =
         -linkall $(mapprefix -cclib, $(LDFLAGS) $(getvar LDFLAGS_$(name)))
       default
         array()
-    OCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
-    $(OCamlOpt) -shared -linkall -I . -o $(LIBRARY_PREFIX)_$(name).cmxs $(LIBRARY_PREFIX)_$(name).cmxa
+    XOCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
 
   else # inpure
     $(LIBRARY_PREFIX)_$(name).cma $(LIBRARY_PREFIX)_$(name).cmxa $(LIBRARY_PREFIX)_$(name).cmxs: $(MakeLibC $(name))
@@ -250,8 +255,7 @@ MakeLibOCaml(name) =
     # use mapprefix instead of addprefix, otherwise "-cclib -lgif"
     # is considered one option.
     OCAML_LIB_FLAGS=-linkall $(mapprefix -cclib, $(LDFLAGS) $(getvar LDFLAGS_$(name)))
-    OCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
-    $(OCamlOpt) -shared -linkall -I . -o $(LIBRARY_PREFIX)_$(name).cmxs $(LIBRARY_PREFIX)_$(name).cmxa
+    XOCamlLibrary($(LIBRARY_PREFIX)_$(name), $(getvar FILES_$(name)))
 
 LIBRARIES=
   # CR jfurue: lablgtk2, freetype and graphics may not be buildable
