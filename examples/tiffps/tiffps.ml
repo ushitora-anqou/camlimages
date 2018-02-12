@@ -58,7 +58,7 @@ let parse_length s = (* return in pt *)
 
 (* Scanlined loader *)
 type scanlined_loader = {
-    read_next_line: (string -> unit);
+    read_next_line: (bytes -> unit);
     close: (unit -> unit)
   }
 
@@ -410,7 +410,7 @@ let main () =
             function x ->
               let adrs = x * 3 in
               for i = 0 to 2 do
-                print_string (sprintf "%02x" (Char.code buf.[adrs+i]))
+                print_string (sprintf "%02x" (Char.code (Bytes.unsafe_get buf (adrs+i))))
               done
           else
             let mono r g b =
@@ -418,9 +418,9 @@ let main () =
             function x ->
               let adrs = x * 3 in
               let m =
-                mono (Char.code buf.[adrs])
-                     (Char.code buf.[adrs + 1])
-                     (Char.code buf.[adrs + 2]) in
+                mono (Char.code (Bytes.unsafe_get buf (adrs)))
+                     (Char.code (Bytes.unsafe_get buf (adrs + 1)))
+                     (Char.code (Bytes.unsafe_get buf (adrs + 2))) in
               for _i = 0 to 2 do print_string (sprintf "%02x" m) done in
         if not conf.mirror
         then for x = x1 to x1 + w - 1 do print_pixel x done
