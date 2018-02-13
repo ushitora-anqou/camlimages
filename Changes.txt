@@ -1,3 +1,6 @@
+4.2.6
+        - Complation fix of tiffps for OCaml 4.06.0
+
 4.2.5
         - Ported to lablgtk.2.8.16
 	- Added cmxs creation
