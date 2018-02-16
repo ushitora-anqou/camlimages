@@ -186,7 +186,7 @@ let xpm = find_library "xpm"
 
 let rgb_txt = C.find_file_in ["rgb.txt"] ["/etc/X11"; "/usr/share/X11"]
   
-let supported_libraries () =
+let supported_libraries =
   [ "lib_gif", gif
   ; "lib_png", png
   ; "lib_jpeg", jpeg
@@ -195,4 +195,9 @@ let supported_libraries () =
   ; "lib_ps", gs
   ; "lib_xpm", xpm
   ; "lib_exif", exif
+  ]
+
+let external_files =
+  [ "path_rgb_txt", rgb_txt
+  ; "path_gs", gs
   ]
