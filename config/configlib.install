@@ -1,0 +1,7 @@
+lib: [
+  "_build/install/default/lib/configlib/META" {"META"}
+  "_build/install/default/lib/configlib/opam" {"opam"}
+]
+bin: [
+  "_build/install/default/bin/camlimages-config" {"camlimages-config"}
+]
