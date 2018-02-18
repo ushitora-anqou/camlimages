@@ -1,0 +1,9 @@
+ (executable
+  ((name test)
+   (modules test)
+   (libraries (camlimages.core camlimages.gif camlimages.jpeg camlimages.png camlimages.tiff camlimages.xpm camlimages.graphics camlimages.freetype))))
+ 
+(executable
+ ((name test2)
+   (modules test2)
+  (libraries (camlimages.core camlimages.gif camlimages.jpeg camlimages.png camlimages.tiff camlimages.xpm camlimages.graphics camlimages.freetype))))

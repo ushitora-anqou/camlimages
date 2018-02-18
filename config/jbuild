@@ -1,20 +1,29 @@
 (jbuild_version 1)
 
-(executables
- ((public_names (camlimages-config))
-  (names (ciconfig))
+(executable
+ ((name ciconfig)
   (preprocess (pps (ppx_meta_conv.ppx)))
   (libraries ( configurator ppx_meta_conv.ocaml findlib spotlib ))))
 	   
-;   (preprocess (pps (ppx_meta_conv.ppx ppx_orakuda.ppx)))
-;   (libraries (sexplib ppx_meta_conv.sexp ppx_orakuda.runtime spotlib xml-light curl tumblr))))
-
-;  (library
-;   ((name configlib)
-;    (public_name configlib)
-;    (libraries ( configurator ))x
-;  ))
-;  ;  (preprocess (pps (ppx_test.ppx)))
-;  ;   (libraries ( unix str ppx_test.runtime ))))
-;  
-;  
+(rule
+ ((targets (
+	    config.h
+	    all_c_flags.sexp
+	    all_c_library_flags.sexp
+	    jpeg_c_flags.sexp
+	    jpeg_c_library_flags.sexp
+	    gif_c_flags.sexp
+	    gif_c_library_flags.sexp
+	    tiff_c_flags.sexp
+	    tiff_c_library_flags.sexp
+	    png_c_flags.sexp
+	    png_c_library_flags.sexp
+	    freetype_c_flags.sexp
+	    freetype_c_library_flags.sexp
+	    exif_c_flags.sexp
+	    exif_c_library_flags.sexp
+	    xpm_c_flags.sexp
+	    xpm_c_library_flags.sexp
+	    ))
+  (deps (ciconfig.exe))
+  (action (run ${<}))))
