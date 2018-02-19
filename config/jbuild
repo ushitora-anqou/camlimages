@@ -2,8 +2,7 @@
 
 (executable
  ((name ciconfig)
-  (preprocess (pps (ppx_meta_conv.ppx)))
-  (libraries ( configurator ppx_meta_conv.ocaml findlib spotlib ))))
+  (libraries ( configurator findlib ))))
 	   
 (rule
  ((targets (

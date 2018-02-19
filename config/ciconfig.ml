@@ -1,5 +1,3 @@
-open Spotlib.Spot
-
 external (&) : ('a -> 'b) -> 'a -> 'b = "%apply"
 (** Haskell's [($)]. *)
 
@@ -16,22 +14,22 @@ let gs = find_program "gs"
 
 let gif = find_library
     [ by_pkg_config "libgif" 
-    ;  by_cc [] ["-lgif"] ["gif_lib.h"] ["DGifOpenFileName"] 
+    ; by_cc ~c_flags:[] ~link_flags:["-lgif"] ~headers:["gif_lib.h"] ~functions:["DGifOpenFileName"] 
     ]
 
 let jpeg = find_library
     [ by_pkg_config "libjpeg"
-    ; by_cc [] ["-ljpeg"] ["jpeglib.h"] ["jpeg_read_header"]
+    ; by_cc ~c_flags:[] ~link_flags:["-ljpeg"] ~headers:["jpeglib.h"] ~functions:["jpeg_read_header"]
     ]
 
 let png = find_library
     [ by_pkg_config "libpng" 
-    ; by_cc [] ["-lpng"; "-lz"] ["png.h"] ["png_create_read_struct"] 
+    ; by_cc ~c_flags:[] ~link_flags:["-lpng"; "-lz"] ~headers:["png.h"] ~functions:["png_create_read_struct"] 
     ]
 
 let tiff = find_library
     [ by_pkg_config "libtiff-4" 
-    ; by_cc [] ["-ltiff"] ["tiff.h"] ["TiffOpen"]
+    ; by_cc ~c_flags:[] ~link_flags:["-ltiff"] ~headers:["tiff.h"] ~functions:["TiffOpen"]
     ]
 
 let freetype = find_library
@@ -39,12 +37,12 @@ let freetype = find_library
 
 let exif = find_library
     [ by_pkg_config "libexif" 
-    ; by_cc [] ["-lexif"] ["exif-data.h"] ["exif_data_load_data"]
+    ; by_cc ~c_flags:[] ~link_flags:["-lexif"] ~headers:["exif-data.h"] ~functions:["exif_data_load_data"]
     ]
 
 let xpm = find_library
     [ by_pkg_config "xpm"
-    ; by_cc [] ["-lXpm"] ["X11/xpm.h"] ["XpmReadFileToXpmImage"]
+    ; by_cc ~c_flags:[] ~link_flags:["-lXpm"] ~headers:["X11/xpm.h"] ~functions:["XpmReadFileToXpmImage"]
     ]
 
 let rgb_txt = find_file "rgb.txt"
@@ -79,6 +77,3 @@ let () =
   write_package_conf_sexps "freetype_" [freetype];
   write_package_conf_sexps "exif_"     [exif];
   write_package_conf_sexps "xpm_"      [xpm]
-  
-  
-    

@@ -1,81 +1,105 @@
-val ( ^/ ) : string -> string -> string
-(** File path concatenation *)
-  
-val path_sep : char
-(** PATH variable seprator *)
+module Configurator : sig
+  include module type of Configurator
 
-val exe : string
-(** executable extension *)
+  val ( ^/ ) : string -> string -> string
+  (** File path concatenation *)
 
-val get_path : unit -> string list
-(** Get the PATH compontents *)
+  val path_sep : char
+  (** PATH variable seprator *)
 
-val find_file_in : string list -> string list -> string option
-(** [find_file_in bases dirs] find one of the file specified in [bases] in the directories [dirs] *)
+  val exe : string
+  (** executable extension *)
 
-val find_program : string -> string option
-(** Find a program in the PATH, ex. [find_program "ls" = Some "ls.exe"] *)
+  val get_path : unit -> string list
+  (** Get the PATH compontents *)
 
-val find_ocaml_program : string -> string option
-(** Find an OCaml program in the PATH, ex. [find_ocaml_program "foo" = Some "foo.opt.exe"] *)
+  val find_file_in : string list -> string list -> string option
+  (** [find_file_in bases dirs] find one of the file specified in [bases] in the directories [dirs] *)
 
-val find_ocaml_package : string -> string option
-(** Find OCamlFind package and returns its directory if found *)
+  val find_program : string -> string option
+  (** Find a program in the PATH, ex. [find_program "ls" = Some "ls.exe"] *)
 
-module Package_conf : sig
-  type t = Configurator.Pkg_config.package_conf
-    = { libs   : string list
-      ; cflags : string list
-      } [@@deriving conv{ocaml}]
+  val find_ocaml_program : string -> string option
+  (** Find an OCaml program in the PATH, ex. [find_ocaml_program "foo" = Some "foo.opt.exe"] *)
 
-  val merge : t -> t -> t
-  
-  val empty : t
+  val find_ocaml_package : string -> string option
+  (** Find OCamlFind package and returns its directory if found *)
+
+  module Package_conf : sig
+    type t = Configurator.Pkg_config.package_conf
+      = { libs   : string list
+        ; cflags : string list
+        }
+
+    val merge : t -> t -> t
+
+    val empty : t
+  end
 end
 
+(** Configuration result item *)
 type item =
   | Pkg_config   of unit         option
   | File         of string       option
   | Program      of string       option
-  | Library      of Package_conf.t option
+  | Library      of Configurator.Package_conf.t option
   | OCamlLibrary of string       option
-
-[@@deriving conv{ocaml}]
 
 module Make(A : sig val name : string end) : sig
   val pkg_config : item
-
+  (** Configuration result of pkg-config command *)
+    
   val find_program
     :  string
     -> item
+  (** [find_program body] finds an executable named [body] in $PATH.
+      In Windows, it seaches [body ^ ".exe"].
+  *)
+
+  val find_ocaml_program
+    :  string
+    -> item
+  (** [find_ocaml_program body] finds an OCaml executable named [body] in $PATH.
+      It is as same as [find_program body], but it first checks the native code compiled version
+      named [body ^ ".opt"] (in Windows, [body ^ ".opt.exe"]).
+  *)
 
   val find_ocaml_package
     :  string
     -> item
+  (** Finds an OCamlFind package *)
 
   val by_pkg_config
     :  string
     -> unit
-    -> Package_conf.t option
+    -> Configurator.Package_conf.t option
+  (** C library searching method using pkg-config command *)
 
   val by_cc
-    :  string list
-    -> string list
-    -> string list
-    -> string list
+    :  c_flags: string list
+    -> link_flags: string list
+    -> headers: string list
+    -> functions: string list
     -> unit
-    -> Package_conf.t option
+    -> Configurator.Package_conf.t option
+  (** C library searching method using C compiler *)
 
   val find_library
-    : (unit -> Package_conf.t option) list
+    : (unit -> Configurator.Package_conf.t option) list
     -> item
+  (** Finds a C library using the one of the given searching methods. *)
 
   val find_file
     :  string
-    -> string list
+    -> dirs:string list
     -> item
+  (** Finds a file in given directories. *)
 
   val make_header : fname:string -> (string * item) list -> unit
+  (** Make a C header file of the configuration results *)
 
-  val write_package_conf_sexps : string -> item list -> unit
+  val write_package_conf_sexps : prefix:string -> item list -> unit
+  (** [write_package_conf_sexps ~prefix items] creates sexp files 
+      [prefix ^ "c_flags.sexp"] and [prefix ^ "c_library_flags.sexp"]
+      for Dune [c_flags] and [c_library_flags] entries *)
 end
