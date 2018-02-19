@@ -146,14 +146,14 @@ val vector_gen :
   (Freetype.face -> 'a -> 'b list -> float * float) ->
   bool ->
   float ->
-  (Freetype.outline_contents -> 'c) ->
+  (Freetype.outline_contents -> unit) ->
   Freetype.face -> float -> float -> 'a array -> unit
 
 val vector_text :
-  bool -> (Freetype.outline_contents -> 'a) ->
+  bool -> (Freetype.outline_contents -> unit) ->
   Freetype.face -> float -> float -> float -> int array -> unit
 
 val vector_glyphs :
-  bool -> (Freetype.outline_contents -> 'a) ->
+  bool -> (Freetype.outline_contents -> unit) ->
   Freetype.face ->
   float -> float -> float -> Freetype.char_index array -> unit

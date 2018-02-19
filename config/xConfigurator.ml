@@ -70,8 +70,6 @@ type item =
   | Library      of Package_conf.t option
   | OCamlLibrary of string option
 
-type package_name = string
-
 module Make(A : sig val name : string end) = struct
   let t = create A.name
 
@@ -106,7 +104,7 @@ module Make(A : sig val name : string end) = struct
      | None -> 
          log "(not found)@.";
          Pkg_config None
-     | Some p -> 
+     | Some _p -> 
          log "(found)@.";
          Pkg_config (Some ())
     )

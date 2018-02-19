@@ -2,6 +2,7 @@
  ((name camlimages_png)
   (public_name camlimages.png)
   (wrapped false)
+  (flags (-w -37))
   (c_names (
 	    pngwrite
 	    pngread

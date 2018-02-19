@@ -2,6 +2,7 @@
  ((name camlimages)
   (public_name camlimages.core)
   (wrapped false)
+  (flags (-w -3))
   (library_flags -linkall)
   ))
 
