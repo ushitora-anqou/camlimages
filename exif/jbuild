@@ -5,7 +5,7 @@
   (c_names (
 	    exif_c
 	    ))
-  (libraries ( camlimages.core ))
+  (libraries ( camlimages.core unix ))
   (library_flags -linkall)
   (c_flags (:include ../config/exif_c_flags.sexp))
   (c_library_flags (:include ../config/exif_c_library_flags.sexp))
