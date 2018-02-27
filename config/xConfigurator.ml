@@ -42,7 +42,17 @@ module Configurator = struct
 
   let find_ocaml_package n =
     match Findlib.package_directory n with
-    | s -> Some s
+    | s -> 
+        (* findlib 1.7.3 installs META file for graphics 
+           even when there is no graphics library installed. *)
+        let dest = Caml.Filename.temp_file "test" ".cma" in
+        let res = match Caml.Sys.command & !% "ocamlfind ocamlc -package %s -o %s -linkpkg" n dest with
+          | 0 -> Some s
+          | _ -> None
+          | exception _ -> None
+        in
+        (try Caml.Sys.remove dest with _ -> ());
+        res
     | exception Findlib.No_such_package _ -> None
 
   module Package_conf = struct
