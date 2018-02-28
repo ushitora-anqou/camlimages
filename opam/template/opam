@@ -10,11 +10,13 @@ maintainer: "jun.furuse@gmail.com"
 depends: [
   "ocamlfind" { build }
   "cppo" { build }
+  "configurator" { build }
   "jbuilder"
   "base-unix"
 ]
 depopts: [
   "lablgtk"
+  "graphics"
 ]
 conflicts: [
   "lablgtk" { < "2.18.6" }
