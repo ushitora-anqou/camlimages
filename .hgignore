@@ -42,3 +42,6 @@ examples/ttfimg/ttfimg$
 
 \.svn/
 opam/generated
+
+.*/\.merlin$
+.*\.install$
