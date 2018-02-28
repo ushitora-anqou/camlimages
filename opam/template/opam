@@ -9,6 +9,7 @@ authors: [
 maintainer: "jun.furuse@gmail.com"
 depends: [
   "ocamlfind" { build }
+  "cppo" { build }
   "jbuilder"
   "base-unix"
 ]
