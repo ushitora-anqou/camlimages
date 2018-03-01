@@ -236,26 +236,29 @@ let color_name_table = ref None
 
 (* CR jfuruse: path_rgb_txt may not exist *)
 let color_table_load () =
-  let ic = open_in Camlimages.path_rgb_txt in
   let table = Hashtbl.create 107 in
-  try
-    while true do
-      let s = input_line ic in
-      if s.[0] <> '!' then
-        let tokens =
-          Mstring.split_str (function ' ' | '\t' -> true | _ -> false) s in
-        match tokens with
-        | r :: g :: b :: rest ->
-          Hashtbl.add table (Mstring.catenate_sep " " rest)
-            {r = int_of_string r; g = int_of_string g; b = int_of_string b;}
-        | _ -> assert false
-    done;
-    raise Exit
-  with
-  | End_of_file ->
-    close_in ic;
-    color_name_table := Some table;
-    table
+  match Camlimages.path_rgb_txt with
+  | None -> table
+  | Some path_rgb_txt ->
+      let ic = open_in path_rgb_txt in
+      try
+        while true do
+          let s = input_line ic in
+          if s.[0] <> '!' then
+            let tokens =
+              Mstring.split_str (function ' ' | '\t' -> true | _ -> false) s in
+            match tokens with
+            | r :: g :: b :: rest ->
+              Hashtbl.add table (Mstring.catenate_sep " " rest)
+                {r = int_of_string r; g = int_of_string g; b = int_of_string b;}
+            | _ -> assert false
+        done;
+        raise Exit
+      with
+      | End_of_file ->
+        close_in ic;
+        color_name_table := Some table;
+        table
 
 let color_name_query c =
   let table =
