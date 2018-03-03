@@ -45,3 +45,4 @@ opam/generated
 
 .*/\.merlin$
 .*\.install$
+^_build$
