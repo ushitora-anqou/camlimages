@@ -31,8 +31,16 @@ let lib_xpm      = get_bool(BOOL_XPM)
 let lib_exif     = get_bool(BOOL_EXIF)
 
 (* External files *)
-let path_rgb_txt = PATH_RGB_TXT
-let path_gs = PATH_GHOSTSCRIPT
+#ifdef PATH_RGB_TXT
+let path_rgb_txt = Some PATH_RGB_TXT
+#else
+let path_rgb_txt = None
+#endif
+#ifdef PATH_GHOSTSCRIPT
+let path_gs = Some PATH_GHOSTSCRIPT
+#else
+let path_gs = None
+#endif
 
 (* They are written in ML, so always supported *)
 let lib_ppm = true

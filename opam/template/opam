@@ -7,22 +7,16 @@ authors: [
   "Pierre Weis"
 ]
 maintainer: "jun.furuse@gmail.com"
-build: [
-  ["omake" "--configure"]
-]
-install: [
-  ["omake" "install"]
-]
-remove: [
-  ["ocamlfind" "remove" "camlimages"]
-]
 depends: [
   "ocamlfind" { build }
+  "cppo" { build }
+  "configurator" { build }
+  "jbuilder"
   "base-unix"
-  "omake" { build & < "0.10" }
 ]
 depopts: [
   "lablgtk"
+  "graphics"
 ]
 conflicts: [
   "lablgtk" { < "2.18.6" }
