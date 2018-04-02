@@ -237,16 +237,17 @@ let find_jpeg_size_and_colormodel ic =
     let ch = jump_to_non_0xff () in
     let str = Bytes.create 5 in
     match ch with
-    | 0xda -> raise Not_found
-    | _ when ch >= 0xc0 && ch <= 0xc3 ->
-      really_input ic str 0 3;
-      really_input ic str 0 5;
+    | 0xda (* SOS *) -> raise Not_found
+    | _ when ch >= 0xc0 (* SOF0 *) && ch <= 0xc3 (* SOF3 *) ->
+      really_input ic str 0 3; (* Lf and P *)
+      really_input ic str 0 5; (* Y, X, and Nf *)
       let colormodel =
+        (* Number of components *)
         match str @% 4 with
-        | 1 -> Info_ColorModel Gray
-        | 3 -> Info_ColorModel YCbCr
-        | 4 -> Info_ColorModel CMYK
-        | _ -> raise Not_found
+        | 1 -> Some (Info_ColorModel Gray)
+        | 3 -> Some (Info_ColorModel YCbCr)
+        | 4 -> Some (Info_ColorModel CMYK)
+        | _ -> None
       in
       (str @% 2) lsl 8 + (str @% 3), (* width *)
       (str @% 0) lsl 8 + (str @% 1), (* height *)
@@ -275,11 +276,13 @@ let check_header filename =
       (str @% 0) = 0xff && (str @% 1) = 0xd8
       (* && String.sub str 6 4 = "JFIF" --- JFIF standard *) then begin
       let w, h, infos =
-      try
-        let w, h, colormodel = find_jpeg_size_and_colormodel ic in
-        w, h, [colormodel]
+        try
+          let w, h, colormodel = find_jpeg_size_and_colormodel ic in
+          w, h, 
+          match colormodel with Some x -> [x] | None -> []
         with
-        | Not_found -> -1, -1, [] in
+        | Not_found -> -1, -1, [] 
+      in
       Pervasives.close_in ic;
       { header_width = w;
         header_height = h;
