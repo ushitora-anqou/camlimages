@@ -2,7 +2,7 @@
 
 (executable
  ((name ciconfig)
-  (flags (:standard -w -6))
+  (flags (:standard -w -3-6))
   (libraries ( configurator findlib ))))
 	   
 (rule
