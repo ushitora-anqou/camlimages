@@ -1,12 +1,6 @@
 opam-version: "1.2"
 version: "5.0.1"
-maintainer: "jun.furuse@gmail.com"
-authors: ["Jun Furuse" "François Pessaux" "Pierre Weis"]
-homepage: "https://bitbucket.org/camlspotter/camlimages"
-bug-reports:
-  "https://bitbucket.org/camlspotter/camlimages/issues?status=new&status=open"
 license: "LGPL-2 with OCaml linking exception"
-dev-repo: "hg://https://bitbucket.org/camlspotter/camlimages"
 build: ["dune" "build" "-p" name "-j" jobs]
 depends: [
   "ocamlfind" {build}
