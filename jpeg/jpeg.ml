@@ -18,6 +18,8 @@ open Util
 open Images
 open Rgb24
 
+module Pervasives = Stdlib
+
 type in_handle
 
 module Marker = struct

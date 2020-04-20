@@ -19,6 +19,8 @@ open Images
 open Rgb24
 open Util
 
+module Pervasives = Stdlib
+
 type colormodel = RGB | CMYK | WHITEBLACK | BLACKWHITE
 
 type in_handle
