@@ -3,5 +3,4 @@
  (public_name camlimages.graphics)
  (optional)
  (wrapped false)
- (libraries camlimages.core )
- (virtual_deps graphics))
+ (libraries camlimages.core grahpics))
