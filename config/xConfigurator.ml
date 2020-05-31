@@ -6,7 +6,7 @@ external (&) : ('a -> 'b) -> 'a -> 'b = "%apply"
 let (!%) fmt = Printf.sprintf fmt
 
 module Configurator = struct
-  include Configurator
+  include Configurator.V1
 
   let ( ^/ ) = Caml.Filename.concat
 
