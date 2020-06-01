@@ -1,7 +1,7 @@
 (executable
  (name ciconfig)
  (flags :standard -w -3-6)
- (libraries base stdio dune.configurator findlib))
+ (libraries base stdio dune-configurator findlib))
 
 (rule
  (targets config.h all_c_flags.sexp all_c_library_flags.sexp
