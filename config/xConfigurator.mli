@@ -1,5 +1,5 @@
 module Configurator : sig
-  include module type of Configurator
+  include module type of Configurator.V1
 
   val ( ^/ ) : string -> string -> string
   (** File path concatenation *)
@@ -26,7 +26,7 @@ module Configurator : sig
   (** Find OCamlFind package and returns its directory if found *)
 
   module Package_conf : sig
-    type t = Configurator.Pkg_config.package_conf
+    type t = Configurator.V1.Pkg_config.package_conf
       = { libs   : string list
         ; cflags : string list
         }
