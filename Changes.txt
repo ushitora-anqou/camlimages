@@ -1,3 +1,9 @@
+5.0.3
+	- Port to OCaml 4.10, with dune-configurator. (Shakthi Kannan <author@shakthimaan.com>)
+
+5.0.2
+	- Port to OCaml 4.08
+
 5.0.1
         - Added colormodel to `header_infos` when a jpeg file is loaded (Ken Sakayori <kensakayori@gmail.com>)
         - Added YCbCr and CMYK color models (Ken Sakayori <kensakayori@gmail.com>)
