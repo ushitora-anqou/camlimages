@@ -11,6 +11,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_EXIF
 
@@ -32,11 +33,59 @@
 #include <libexif/exif-mnote-data.h>
 #include <libexif/exif-mem.h>
 
-value Val_ExifBytes(unsigned char *p, value vsize)
+#define ExifData_of_data(data)(Ptr_val(Field(data, 0)))
+
+CAMLprim value Val_ExifBytes(unsigned char *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal1(res);
+
     int i;
+    res = alloc(Int_val(vsize),0);
+    for(i=0; i<Int_val(vsize); i++){
+        Store_field(res,i,Val_int(p[i]));
+    }
+
+    CAMLreturn(res);
+}
+
+CAMLprim value Val_ExifSBytes(signed char *p, value vsize)
+{
+    CAMLparam0();
+    CAMLlocal1(res);
+
+    int i;
+
+    res = alloc(Int_val(vsize),0);
+    for(i=0; i<Int_val(vsize); i++){
+        Store_field(res,i,Val_int(p[i]));
+    }
+
+    CAMLreturn(res);
+}
+
+CAMLprim value Val_ExifShorts(unsigned short *p, value vsize)
+{
+    CAMLparam0();
+    CAMLlocal1(res);
+
+    int i;
+
+    res = alloc(Int_val(vsize),0);
+    for(i=0; i<Int_val(vsize); i++){
+        Store_field(res,i,Val_int(p[i]));
+    }
+
+    CAMLreturn(res);
+}
+
+CAMLprim value Val_ExifSShorts(short *p, value vsize)
+{
+    CAMLparam0();
+    CAMLlocal1(res);
+
+    int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         Store_field(res,i,Val_int(p[i]));
@@ -44,71 +93,43 @@ value Val_ExifBytes(unsigned char *p, value vsize)
     CAMLreturn(res);
 }
 
-value Val_ExifSBytes(signed char *p, value vsize)
+CAMLprim value Val_ExifLongs(unsigned long *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal1(res);
-    int i;
-    res = alloc(Int_val(vsize),0);
-    for(i=0; i<Int_val(vsize); i++){
-        Store_field(res,i,Val_int(p[i]));
-    }
-    CAMLreturn(res);
-}
 
-value Val_ExifShorts(unsigned short *p, value vsize)
-{
-    CAMLparam0();
-    CAMLlocal1(res);
     int i;
-    res = alloc(Int_val(vsize),0);
-    for(i=0; i<Int_val(vsize); i++){
-        Store_field(res,i,Val_int(p[i]));
-    }
-    CAMLreturn(res);
-}
 
-value Val_ExifSShorts(short *p, value vsize)
-{
-    CAMLparam0();
-    CAMLlocal1(res);
-    int i;
-    res = alloc(Int_val(vsize),0);
-    for(i=0; i<Int_val(vsize); i++){
-        Store_field(res,i,Val_int(p[i]));
-    }
-    CAMLreturn(res);
-}
-
-value Val_ExifLongs(unsigned long *p, value vsize)
-{
-    CAMLparam0();
-    CAMLlocal1(res);
-    int i;
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         Store_field(res,i,caml_copy_int64(p[i]) /* too big... */ );
     }
+
     CAMLreturn(res);
 }
 
-value Val_ExifSLongs(long *p, value vsize)
+CAMLprim value Val_ExifSLongs(long *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal1(res);
+
     int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         Store_field(res,i,caml_copy_int32(p[i]) /* too big... */ );
     }
+
     CAMLreturn(res);
 }
 
-value Val_ExifRationals(unsigned long *p, value vsize)
+CAMLprim value Val_ExifRationals(unsigned long *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal2(res,tmp);
+
     int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         tmp = alloc(2,0);
@@ -116,14 +137,17 @@ value Val_ExifRationals(unsigned long *p, value vsize)
         Store_field(tmp,1, caml_copy_int64(p[i*2+1]) /* too big... */ );
         Store_field(res,i, tmp);
     }
+
     CAMLreturn(res);
 }
 
-value Val_ExifSRationals(long *p, value vsize)
+CAMLprim value Val_ExifSRationals(long *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal2(res,tmp);
+
     int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         tmp = alloc(2,0);
@@ -131,91 +155,117 @@ value Val_ExifSRationals(long *p, value vsize)
         Store_field(tmp,1,caml_copy_int32(p[i*2]+1) /* too big... */ );
         Store_field(res,i,tmp);
     }
+
     CAMLreturn(res);
 }
 
-value Val_ExifFloats(float *p, value vsize)
+CAMLprim value Val_ExifFloats(float *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal2(res,tmp);
+
     int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         Store_field(res,i,caml_copy_double(p[i]));
     }
+
     CAMLreturn(res);
 }
 
-value Val_ExifDoubles(double *p, value vsize)
+CAMLprim value Val_ExifDoubles(double *p, value vsize)
 {
     CAMLparam0();
     CAMLlocal2(res,tmp);
+
     int i;
+
     res = alloc(Int_val(vsize),0);
     for(i=0; i<Int_val(vsize); i++){
         Store_field(res,i, caml_copy_double(p[i]));
     }
+
     CAMLreturn(res);
 }
 
-value caml_exif_tag_get_name_in_ifd(value tag, value ifd)
+CAMLprim value caml_exif_tag_get_name_in_ifd(value tag, value ifd)
 {
-    return caml_copy_string(exif_tag_get_name_in_ifd(Int_val(tag), Int_val(ifd)));
+    CAMLparam2(tag, ifd);
+    
+    CAMLreturn( caml_copy_string(exif_tag_get_name_in_ifd(Int_val(tag), Int_val(ifd))) );
 }
 
 //////////
 
 
-value caml_val_exif_data(value string)
+CAMLprim value caml_val_exif_data(value string)
 {
     CAMLparam1(string);
     CAMLlocal1(res);
-    ExifData *data = exif_data_new_from_data(String_val(string), 
+
+    ExifData *data = exif_data_new_from_data((const unsigned char*)String_val(string), 
                                              caml_string_length(string));
 
     if( !data ){ failwith("exif_data_new_from_data"); }
 
-    // exif_data_free(data);
-
-    //fprintf(stderr, "data=%x\n", data);
     res = alloc_small(1,0);
-    Field(res,0) = (value)data;
+    Field(res,0) = Val_ptr(data);
 
     CAMLreturn(res);
 }
 
-void caml_exif_set_byte_order(value data, value order)
+CAMLprim void caml_exif_set_byte_order(value data, value order)
 {
-    exif_data_set_byte_order((ExifData *)Field(data, 0), Int_val(order));
+    CAMLparam2(data, order);
+
+    exif_data_set_byte_order(ExifData_of_data(data), Int_val(order));
+
+    CAMLreturn0;
 }
 
-value caml_exif_get_byte_order(value data)
+CAMLprim value caml_exif_get_byte_order(value data)
 {
     CAMLparam1(data);
-    CAMLreturn(Val_int(exif_data_get_byte_order((ExifData *)Field(data, 0))));
+
+    CAMLreturn( Val_int(exif_data_get_byte_order( ExifData_of_data(data) )) );
 }
 
-void caml_exif_data_fix(value data)
+CAMLprim void caml_exif_data_fix(value data)
 {
-    exif_data_fix((ExifData *)Field(data, 0));
+    CAMLparam1(data);
+
+    exif_data_fix( ExifData_of_data(data) );
+
+    CAMLreturn0;
 }
 
-void caml_exif_data_unref(value data)
+CAMLprim void caml_exif_data_unref(value data)
 {
-    exif_data_unref((ExifData*)Field(data, 0));
+    CAMLparam1(data);
+
+    exif_data_unref( ExifData_of_data(data) );
+
+    CAMLreturn0;
 }
  
-void caml_exif_data_dump(value data)
+CAMLprim void caml_exif_data_dump(value data)
 {
-    exif_data_dump((ExifData*)Field(data, 0));
+    CAMLparam1(data);
+
+    exif_data_dump( ExifData_of_data(data) );
+
+    CAMLreturn0;
 }
 
-value caml_exif_data_contents(value vdata)
+CAMLprim value caml_exif_data_contents(value vdata)
 {
     CAMLparam1(vdata);
     CAMLlocal3(res, tmp, tmp2);
+
     int i;
-    ExifData *data = (ExifData*)Field(vdata,0);
+
+    ExifData *data = ExifData_of_data(vdata);
     //fprintf(stderr, "data=%x\n", data);
     res = alloc_tuple(EXIF_IFD_COUNT);
     for(i=0; i< EXIF_IFD_COUNT; i++){
@@ -223,7 +273,7 @@ value caml_exif_data_contents(value vdata)
         if( p ){ 
             exif_content_ref(p);
             tmp = alloc_small(1,0);
-            Field(tmp,0) = (value)p;
+            Field(tmp,0) = Val_ptr(p);
             tmp2 = alloc_small(1,0);
             //fprintf(stderr, "content=%x (count=%d)\n", p, p->count);
             Field(tmp2,0) = tmp;
@@ -232,21 +282,28 @@ value caml_exif_data_contents(value vdata)
             Store_field(res,i,Val_int(0));
         }
     }
+
     CAMLreturn(res);
 }
 
-void caml_exif_content_unref(value vdata)
+CAMLprim void caml_exif_content_unref(value vdata)
 {
-    ExifContent *c = (ExifContent*)Field(vdata,0);
+    CAMLparam1(vdata);
+
+    ExifContent *c = Ptr_val(Field(vdata,0));
     exif_content_unref(c);
+
+    CAMLreturn0;
 }
 
-value caml_exif_content_entries(value vdata)
+CAMLprim value caml_exif_content_entries(value vdata)
 {
     CAMLparam1(vdata);
     CAMLlocal3(res, tmp, tmp2);
+
     int i;
-    ExifContent *c = (ExifContent *)Field(vdata,0);
+
+    ExifContent *c = (ExifContent *)Ptr_val(Field(vdata,0));
     //fprintf(stderr, "content=%x (count=%d)\n", c, c->count);
     res = Val_int(0); // null
     for(i=c->count-1; i>=0; i--){
@@ -256,7 +313,7 @@ value caml_exif_content_entries(value vdata)
             
             // boxing
             tmp = alloc_small(1,0);
-            Field(tmp,0) = (value)e;
+            Field(tmp,0) = Val_ptr(e);
 
             // cons
             tmp2 = alloc_small(2,0);
@@ -267,27 +324,34 @@ value caml_exif_content_entries(value vdata)
             res = tmp2;
         }
     }
+
     CAMLreturn(res);
 }
 
-void caml_exif_entry_unref(value vdata)
+CAMLprim void caml_exif_entry_unref(value vdata)
 {
-    ExifEntry *c = (ExifEntry*)Field(vdata,0);
+    CAMLparam1(vdata);
+
+    ExifEntry *c = Ptr_val(Field(vdata,0));
     exif_entry_unref(c);
+
+    CAMLreturn0;
 }
 
-value caml_exif_decode_entry(value vdata)
+CAMLprim value caml_exif_decode_entry(value vdata)
 {
     CAMLparam1(vdata);
     CAMLlocal1(tpl);
-    ExifEntry *p = (ExifEntry *)Field(vdata,0);
+
+    ExifEntry *p = Ptr_val(Field(vdata,0));
 
     tpl = alloc_tuple(4);
     Store_field(tpl,0,Val_int(p->tag));
     Store_field(tpl,1,Val_int(p->format));
     Store_field(tpl,2,Val_int(p->components)); // hope it never overflow...
     Store_field(tpl,3,alloc_string(p->size));
-    memcpy(String_val(Field(tpl,3)), p->data, p->size);
+    memcpy(Bytes_val(Field(tpl,3)), p->data, p->size);
+
     CAMLreturn(tpl);
 }
 

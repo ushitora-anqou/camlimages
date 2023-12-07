@@ -15,6 +15,7 @@
 /* $Id: Exp */
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_PNG
 
@@ -92,7 +93,7 @@ value write_png_file_rgb( name, buffer, width, height, with_alpha )
   {
     int rowbytes, i;
     png_bytep *row_pointers;
-    char *buf = String_val(buffer);
+    png_bytep buf = Bytes_val(buffer);
 
     row_pointers = (png_bytep*)stat_alloc(sizeof(png_bytep) * h);
 
@@ -101,7 +102,7 @@ value write_png_file_rgb( name, buffer, width, height, with_alpha )
     printf("rowbytes= %d width=%d\n", rowbytes, w);
 #endif
     for(i=0; i< h; i++){
-      row_pointers[i] = (png_bytep)(buf + rowbytes * i);
+      row_pointers[i] = buf + rowbytes * i;
     }
 
     png_write_image(png_ptr, row_pointers);
@@ -216,7 +217,7 @@ value write_png_file_index( name, buffer, cmap, width, height )
   {
     int rowbytes, i;
     png_bytep *row_pointers;
-    char *buf = String_val(buffer);
+    png_bytep buf = Bytes_val(buffer);
 
     row_pointers = (png_bytep*)stat_alloc(sizeof(png_bytep) * h);
 
@@ -232,7 +233,7 @@ value write_png_file_index( name, buffer, cmap, width, height )
       failwith("png write error (illegal byte/pixel)");
     }
     for(i=0; i< h; i++){
-      row_pointers[i] = (png_bytep)(buf + rowbytes * i);
+      row_pointers[i] = buf + rowbytes * i;
     }
 
     png_write_image(png_ptr, row_pointers);

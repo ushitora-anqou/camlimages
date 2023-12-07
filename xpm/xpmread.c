@@ -13,6 +13,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_XPM
 
@@ -31,7 +32,7 @@ value read_xpm_file( name )
   CAMLparam1(name);
   CAMLlocal3(cmap,imap,result);
 
-  char *filename;
+  const char *filename;
   XpmImage image;
   int i;
 

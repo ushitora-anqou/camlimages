@@ -13,6 +13,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_TIFF
 
@@ -47,94 +48,100 @@ extern value *imglib_error;
 value open_tiff_file_for_read( name )
      value name;
 {
-  CAMLparam1(name);
-  CAMLlocal1(res);
-  CAMLlocalN(r,5);
+    CAMLparam1(name);
+    CAMLlocal1(res);
+    CAMLlocalN(r,5);
 
-  char *filename; 
-  TIFF* tif;
+    const char *filename; 
+    TIFF* tif;
   
-  filename = String_val( name );
+    filename = String_val( name );
   
-  tif = TIFFOpen(filename, "r");
-  if (tif) {
-    uint32 imagelength;
-    uint32 imagewidth;
-    uint16 imagesample;
-    uint16 imagebits;
-    tdata_t buf;
-    int i;
-    uint16 runit;
-    float xres, yres;
-    uint16 photometric;
+    tif = TIFFOpen(filename, "r");
+    if (tif) {
+        uint32 imagelength;
+        uint32 imagewidth;
+        uint16 imagesample;
+        uint16 imagebits;
+        tdata_t buf;
+        int i;
+        uint16 runit;
+        float xres, yres;
+        uint16 photometric;
 
-    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &imagelength);
-    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &imagewidth);
-    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &imagebits);
-    TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &imagesample);
-    TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &runit);
-    TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xres);
-    TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yres);
-    TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photometric);
+        TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &imagelength);
+        TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &imagewidth);
+        TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &imagebits);
+        TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &imagesample);
+        TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &runit);
+        TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xres);
+        TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yres);
+        TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photometric);
 
-    if (oversized (imagewidth, imagelength)) {
-      failwith_oversized("tiff");
-    }
+        if (oversized (imagewidth, imagelength)) {
+            failwith_oversized("tiff");
+        }
 
-    if( imagesample == 3 && photometric == PHOTOMETRIC_RGB ){
-      if( imagebits != 8 ){
-	failwith("Sorry, tiff rgb file must be 24bit-color");
-      }
-      r[3] = Val_int(0); /* RGB */
-    } else if( imagesample == 4 && photometric == PHOTOMETRIC_SEPARATED ){
-      if( imagebits != 8 ){
-	failwith("Sorry, tiff cmyk file must be 32bit-color");
-      }
-      r[3] = Val_int(1); /* CMYK */
-    } else if( imagesample == 1 && imagebits == 1 ) { /* BW */
-      r[3] = Val_int (photometric == PHOTOMETRIC_MINISWHITE ? 2 : 3);
+        if( imagesample == 3 && photometric == PHOTOMETRIC_RGB ){
+            if( imagebits != 8 ){
+                failwith("Sorry, tiff rgb file must be 24bit-color");
+            }
+            r[3] = Val_int(0); /* RGB */
+        } else if( imagesample == 4 && photometric == PHOTOMETRIC_SEPARATED ){
+            if( imagebits != 8 ){
+                failwith("Sorry, tiff cmyk file must be 32bit-color");
+            }
+            r[3] = Val_int(1); /* CMYK */
+        } else if( imagesample == 1 && imagebits == 1 ) { /* BW */
+            r[3] = Val_int (photometric == PHOTOMETRIC_MINISWHITE ? 2 : 3);
+        } else {
+            fprintf(stderr, "photometric=%d, imagesample=%d, imagebits=%d\n", photometric, imagesample, imagebits);
+            failwith("Sorry, unsupported tiff format");
+        }
+
+        buf = _TIFFmalloc(TIFFScanlineSize(tif));
+
+        r[0] = Val_int(imagewidth);
+        r[1] = Val_int(imagelength);
+        if ( runit == RESUNIT_INCH &&
+             xres == yres ){
+            r[2] = copy_double( xres );
+        } else {
+            r[2] = copy_double ( -1.0 );
+        }
+        /* r[3] is defined above */ 
+        r[4] = Val_ptr(tif);
+        res = alloc_small(5,0);
+        for(i=0; i<5; i++) Store_field(res, i, r[i]);
+
+        CAMLreturn(res);
     } else {
-      fprintf(stderr, "photometric=%d, imagesample=%d, imagebits=%d\n", photometric, imagesample, imagebits);
-      failwith("Sorry, unsupported tiff format");
+        failwith("failed to open tiff file");
     }
-
-    buf = _TIFFmalloc(TIFFScanlineSize(tif));
-
-    r[0] = Val_int(imagewidth);
-    r[1] = Val_int(imagelength);
-    if ( runit == RESUNIT_INCH &&
-	 xres == yres ){
-      r[2] = copy_double( xres );
-    } else {
-      r[2] = copy_double ( -1.0 );
-    }
-    /* r[3] is defined above */ 
-    r[4] = (value)tif;
-    res = alloc_small(5,0);
-    for(i=0; i<5; i++) Store_field(res, i, r[i]);
-
-    CAMLreturn(res);
-  } else {
-    failwith("failed to open tiff file");
-  }
 }
 
-value read_tiff_scanline( tiffh, buf, row )
-     value tiffh;
+value read_tiff_scanline( vtiffh, buf, row )
+     value vtiffh;
      value buf;
      value row;
 {
-  CAMLparam3(tiffh,buf,row);
-  TIFFReadScanline((TIFF*)tiffh, String_val(buf), Int_val(row), 0);
-  CAMLreturn(Val_unit);
+    CAMLparam3(vtiffh,buf,row);
+
+    TIFF *tiffh = Ptr_val(vtiffh);
+    TIFFReadScanline(tiffh, Bytes_val(buf), Int_val(row), 0);
+
+    CAMLreturn(Val_unit);
 }
 
-value close_tiff_file( tiffh )
-     value tiffh;
+value close_tiff_file( vtiffh )
+     value vtiffh;
 {
-  CAMLparam1(tiffh);
-  TIFFClose((TIFF*)tiffh);
-  CAMLreturn(Val_unit);
+    CAMLparam1(vtiffh);
+
+    TIFF *tiffh = Ptr_val(vtiffh);
+    TIFFClose(tiffh);
+
+    CAMLreturn(Val_unit);
 }
 
 #else // HAS_TIFF

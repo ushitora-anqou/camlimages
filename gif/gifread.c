@@ -13,6 +13,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_GIF
 
@@ -35,116 +36,116 @@
 
 value Val_GifColorType( GifColorType *color )
 {
-  CAMLparam0();
-  CAMLlocal1(res);
-  CAMLlocalN(r,3);
-  int i;
+    CAMLparam0();
+    CAMLlocal1(res);
+    CAMLlocalN(r,3);
+    int i;
 
-  r[0] = Val_int( color->Red );
-  r[1] = Val_int( color->Green );
-  r[2] = Val_int( color->Blue );
-  res = alloc_small(3,0);
-  for(i=0; i<3; i++) Field(res, i) = r[i];
+    r[0] = Val_int( color->Red );
+    r[1] = Val_int( color->Green );
+    r[2] = Val_int( color->Blue );
+    res = alloc_small(3,0);
+    for(i=0; i<3; i++) Field(res, i) = r[i];
 #ifdef DEBUG_GIF
-fprintf(stderr, "Color(%d,%d,%d)\n", color->Red, color->Green, color->Blue);
-fflush(stderr);
+    fprintf(stderr, "Color(%d,%d,%d)\n", color->Red, color->Green, color->Blue);
+    fflush(stderr);
 #endif
-  CAMLreturn(res);
+    CAMLreturn(res);
 }
 
 value Val_ColorMapObject( ColorMapObject *colorMap )
 {
-  CAMLparam0();
-  CAMLlocal1(cmap);
-  int i;
+    CAMLparam0();
+    CAMLlocal1(cmap);
+    int i;
 
-  if ( colorMap != NULL ){
+    if ( colorMap != NULL ){
 #ifdef DEBUG_GIF
-    fprintf(stderr, "Colormap(%d)...\n", colorMap->ColorCount);
-    fflush(stderr);
+        fprintf(stderr, "Colormap(%d)...\n", colorMap->ColorCount);
+        fflush(stderr);
 #endif 
 
-    cmap = alloc_tuple(colorMap->ColorCount);
-    for(i= 0; i< colorMap->ColorCount; i++){
-        Store_field(cmap,i, Val_GifColorType( &colorMap->Colors[i] ));
+        cmap = alloc_tuple(colorMap->ColorCount);
+        for(i= 0; i< colorMap->ColorCount; i++){
+            Store_field(cmap,i, Val_GifColorType( &colorMap->Colors[i] ));
+        }
+    } else {
+#ifdef DEBUG_GIF
+        fprintf(stderr, "Colormap(0)...\n");
+        fflush(stderr);
+#endif 
+        cmap = Atom(0); /* cmap = alloc_tuple(0); is WRONG!! */
     }
-  } else {
-#ifdef DEBUG_GIF
-    fprintf(stderr, "Colormap(0)...\n");
-    fflush(stderr);
-#endif 
-    cmap = Atom(0); /* cmap = alloc_tuple(0); is WRONG!! */
-  }
-  CAMLreturn(cmap);
+    CAMLreturn(cmap);
 }
 
 value Val_GifImageDesc( GifImageDesc *imageDesc )
 {
-  CAMLparam0();
-  CAMLlocal1(res);
-  CAMLlocalN(r,6);
-  int i;
+    CAMLparam0();
+    CAMLlocal1(res);
+    CAMLlocalN(r,6);
+    int i;
 
 #ifdef DEBUG_GIF
-fprintf(stderr, "imagedesc...\n");
-fflush(stderr);
+    fprintf(stderr, "imagedesc...\n");
+    fflush(stderr);
 #endif
 
-/*
-    {
+    /*
+      {
       int Len,i,j;
       Len = 1 << imageDesc->ColorMap->BitsPerPixel;
       for (i = 0; i < Len; i+=4) {
-	for (j = 0; j < 4 && j < Len; j++) {
+      for (j = 0; j < 4 && j < Len; j++) {
 	  printf("%3d: %02xh %02xh %02xh   ", i + j,
-		 imageDesc->ColorMap->Colors[i + j].Red,
-		 imageDesc->ColorMap->Colors[i + j].Green,
-		 imageDesc->ColorMap->Colors[i + j].Blue);
-	}
-	printf("\n");
+      imageDesc->ColorMap->Colors[i + j].Red,
+      imageDesc->ColorMap->Colors[i + j].Green,
+      imageDesc->ColorMap->Colors[i + j].Blue);
       }
-    }
-*/
+      printf("\n");
+      }
+      }
+    */
 
 
-  r[0] = Val_int( imageDesc->Left );
-  r[1] = Val_int( imageDesc->Top );
-  r[2] = Val_int( imageDesc->Width );
-  r[3] = Val_int( imageDesc->Height );
-  r[4] = Val_int( imageDesc->Interlace );
-  r[5] = Val_ColorMapObject( imageDesc->ColorMap );
-  res = alloc_small(6,0);
-  for(i=0; i<6; i++) Field(res, i) = r[i];
-  CAMLreturn(res);
+    r[0] = Val_int( imageDesc->Left );
+    r[1] = Val_int( imageDesc->Top );
+    r[2] = Val_int( imageDesc->Width );
+    r[3] = Val_int( imageDesc->Height );
+    r[4] = Val_int( imageDesc->Interlace );
+    r[5] = Val_ColorMapObject( imageDesc->ColorMap );
+    res = alloc_small(6,0);
+    for(i=0; i<6; i++) Field(res, i) = r[i];
+    CAMLreturn(res);
 }
 
 value Val_ScreenInfo( GifFileType *GifFile )
 {
-  CAMLparam0();
-  CAMLlocal1(res);
-  CAMLlocalN(r,5);
+    CAMLparam0();
+    CAMLlocal1(res);
+    CAMLlocalN(r,5);
 
-  int i;
+    int i;
 
-  r[0] = Val_int(GifFile->SWidth);
-  r[1] = Val_int(GifFile->SHeight);
-  r[2] = Val_int(GifFile->SColorResolution);
-  r[3] = Val_int(GifFile->SBackGroundColor);
-  r[4] = Val_ColorMapObject(GifFile->SColorMap);
-  res = alloc_small(5,0);
-  for(i=0; i<5; i++) Field(res, i) = r[i];
+    r[0] = Val_int(GifFile->SWidth);
+    r[1] = Val_int(GifFile->SHeight);
+    r[2] = Val_int(GifFile->SColorResolution);
+    r[3] = Val_int(GifFile->SBackGroundColor);
+    r[4] = Val_ColorMapObject(GifFile->SColorMap);
+    res = alloc_small(5,0);
+    for(i=0; i<5; i++) Field(res, i) = r[i];
 
-  CAMLreturn(res);
+    CAMLreturn(res);
 }
 
 value dGifOpenFileName( value name )
 {
-  CAMLparam1(name);
-  CAMLlocal1(res);
-  CAMLlocalN(r,2);
+    CAMLparam1(name);
+    CAMLlocal1(res);
+    CAMLlocalN(r,2);
 
-  GifFileType *GifFile;
-  int i;
+    GifFileType *GifFile;
+    int i;
 
 #if (GIFLIB_MAJOR <= 4)
     GifFile = DGifOpenFileName( String_val(name) );
@@ -152,106 +153,113 @@ value dGifOpenFileName( value name )
     GifFile = DGifOpenFileName( String_val(name), NULL);
 #endif
 
-  if(GifFile == NULL){
-    failwith("DGifOpenFileName");
-  }
+    if(GifFile == NULL){
+        failwith("DGifOpenFileName");
+    }
 
-  r[0] = Val_ScreenInfo( GifFile );
-  r[1] = (value) GifFile;
-  res = alloc_small(2,0);
-  for(i=0; i<2; i++) Field(res, i) = r[i];
+    r[0] = Val_ScreenInfo( GifFile );
+    r[1] = Val_ptr( GifFile );
+    res = alloc_small(2,0);
+    for(i=0; i<2; i++) Field(res, i) = r[i];
 
-  CAMLreturn(res);
+    CAMLreturn(res);
 } 
 
 void dGifCloseFile( value hdl )
 {
-  CAMLparam1(hdl);
+    CAMLparam1(hdl);
 
-  /* For the bug libungif/giflib 4.1.0 */
-  /* This may add a new memory leak, but it is better than having 
-     segmentation faults */
-  ((GifFileType *)hdl)->Image.ColorMap = NULL; 
+    GifFileType *GifFile = Ptr_val(hdl);
+
+    /* For the bug libungif/giflib 4.1.0 */
+    /* This may add a new memory leak, but it is better than having 
+       segmentation faults */
+    GifFile->Image.ColorMap = NULL; 
 
 #if (GIFLIB_MAJOR <= 4)
-  DGifCloseFile( (GifFileType *) hdl);
+    DGifCloseFile( GifFile );
 #else
-  DGifCloseFile( (GifFileType *) hdl, NULL );
+    DGifCloseFile( GifFile, NULL );
 #endif
-  CAMLreturn0;
+    CAMLreturn0;
 }
 
 value dGifGetRecordType( value hdl )
 {
-  CAMLparam1(hdl);
+    CAMLparam1(hdl);
 
-  GifRecordType RecordType;
-  if (DGifGetRecordType((GifFileType*) hdl, &RecordType) == GIF_ERROR) {
-    failwith("DGifGetRecordType");
-  }
-  CAMLreturn(Val_int(RecordType));
+    GifFileType *GifFile = Ptr_val(hdl);
+
+    GifRecordType RecordType;
+    if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) {
+        failwith("DGifGetRecordType");
+    }
+    CAMLreturn(Val_int(RecordType));
 }
 
 value dGifGetImageDesc( value hdl )
 {
-  CAMLparam1(hdl);
+    CAMLparam1(hdl);
 
-  if (DGifGetImageDesc( (GifFileType*) hdl )  == GIF_ERROR){
-    failwith("DGIFGetImageDesc");
-  }
-  CAMLreturn(Val_GifImageDesc( &((GifFileType*) hdl)-> Image ));
+    GifFileType *GifFile = Ptr_val(hdl);
+
+    if (DGifGetImageDesc(GifFile)  == GIF_ERROR){
+        failwith("DGIFGetImageDesc");
+    }
+
+    CAMLreturn(Val_GifImageDesc( &(GifFile->Image) ));
 }
 
 value dGifGetLine( value hdl )
 {
-  CAMLparam1(hdl);
-  CAMLlocal1(buf);
+    CAMLparam1(hdl);
+    CAMLlocal1(buf);
 
-  GifFileType *GifFile = (GifFileType*) hdl;
+    GifFileType *GifFile = Ptr_val(hdl);
 
-  if( oversized( GifFile->Image.Width, sizeof(GifPixelType) ) ){
-    failwith_oversized("gif");
-  }
-  buf = alloc_string( GifFile->Image.Width * sizeof(GifPixelType) ); 
+    if( oversized( GifFile->Image.Width, sizeof(GifPixelType) ) ){
+        failwith_oversized("gif");
+    }
+    buf = alloc_string( GifFile->Image.Width * sizeof(GifPixelType) ); 
 
-  if( DGifGetLine(GifFile, (unsigned char*)String_val(buf), GifFile->Image.Width ) 
-      == GIF_ERROR ){
-    // PrintGifError ();
-    failwith("DGifGetLine");
-  }
-  CAMLreturn(buf);
+    if( DGifGetLine(GifFile, (unsigned char*)String_val(buf), GifFile->Image.Width ) 
+        == GIF_ERROR ){
+        // PrintGifError ();
+        failwith("DGifGetLine");
+    }
+    CAMLreturn(buf);
 }
 
 value dGifGetExtension( value hdl )
 {
-  CAMLparam1(hdl);
-  CAMLlocal3(ext,exts,res);
-  CAMLlocal1(newres);
+    CAMLparam1(hdl);
+    CAMLlocal3(ext,exts,res);
+    CAMLlocal1(newres);
 
-  GifFileType *GifFile = (GifFileType*) hdl;
-  int func;
-  GifByteType *extData;
+    GifFileType *GifFile = Ptr_val(hdl);
+    int func;
+    GifByteType *extData;
 
-  exts = Val_int(0);
+    exts = Val_int(0);
 
-  if (DGifGetExtension(GifFile,&func, &extData) == GIF_ERROR){
-    failwith("DGifGetExtension");
-  }
+    if (DGifGetExtension(GifFile,&func, &extData) == GIF_ERROR){
+        failwith("DGifGetExtension");
+    }
 
-  while( extData != NULL ){
-    ext= alloc_string(extData[0]);
-    memcpy(String_val(ext), &extData[1], extData[0]);
-    newres = alloc_small(2,0);
-    Field(newres, 0)= ext;
-    Field(newres, 1)= exts;
-    exts= newres;
-    DGifGetExtensionNext(GifFile, &extData);
-  }
-  res = alloc_small(2,0);
-  Field(res,0) = Val_int(func);
-  Field(res,1) = exts;
+    while( extData != NULL ){
+        ext= alloc_string(extData[0]);
+        memcpy(Bytes_val(ext), &extData[1], extData[0]);
+        newres = alloc_small(2,0);
+        Field(newres, 0)= ext;
+        Field(newres, 1)= exts;
+        exts= newres;
+        DGifGetExtensionNext(GifFile, &extData);
+    }
+    res = alloc_small(2,0);
+    Field(res,0) = Val_int(func);
+    Field(res,1) = exts;
 
-  CAMLreturn(res);
+    CAMLreturn(res);
 }
 
 #else // HAS_GIF

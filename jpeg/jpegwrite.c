@@ -13,6 +13,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_JPEG
 
@@ -63,7 +64,7 @@ value open_jpeg_file_for_write_colorspace( name, width, height, qual, colorspace
 {
   CAMLparam0();
   CAMLlocal1(res);
-  char *filename;
+  const char *filename;
   int image_height;
   int image_width;
   int quality;
@@ -109,9 +110,9 @@ value open_jpeg_file_for_write_colorspace( name, width, height, qual, colorspace
   jpeg_start_compress(cinfop, TRUE);
 
   res = alloc_small(3,0);
-  Field(res, 0) = (value)cinfop;
-  Field(res, 1) = (value)outfile;
-  Field(res, 2) = (value)jerrp;
+  Field(res, 0) = Val_ptr(cinfop);
+  Field(res, 1) = Val_ptr(outfile);
+  Field(res, 2) = Val_ptr(jerrp);
 
   /*
   fprintf(stderr, "cinfop= %d outfile= %d %d %d \n", cinfop, infile, cinfop->output_scanline, cinfop->output_height); 
@@ -143,16 +144,16 @@ value open_jpeg_file_for_write_cmyk( name, width, height, qual )
 void caml_jpeg_write_marker( value jpegh, value raw )
 {
     struct jpeg_compress_struct *cinfop;
-    cinfop = (struct jpeg_compress_struct *) Field( jpegh, 0 );
+    cinfop = (struct jpeg_compress_struct *) Ptr_val(Field( jpegh, 0 ));
 
     // EXTERN(void) jpeg_write_marker
 	// JPP((j_compress_ptr cinfo, int marker,
     // const JOCTET * dataptr, unsigned int datalen));
     
     int code = Int_val(Field(raw,0));
-    char *data = String_val(Field(raw,1));
+    const char *data = String_val(Field(raw,1));
     unsigned int len = caml_string_length(Field(raw,1));
-    jpeg_write_marker(cinfop, code, data, len); // This actually writes bytes, so data seems to be ok being GCed.
+    jpeg_write_marker(cinfop, code, (const JOCTET*)data, len); // This actually writes bytes, so data seems to be ok being GCed.
 }
 
 // You can write special markers immediately following the datastream header by
@@ -171,9 +172,9 @@ value jpegh, buf;
   struct jpeg_compress_struct *cinfop;
   JSAMPROW row[1];
 
-  cinfop = (struct jpeg_compress_struct *) Field( jpegh, 0 );
+  cinfop = (struct jpeg_compress_struct *) Ptr_val(Field( jpegh, 0 ));
 
-  row[0] = String_val( buf );
+  row[0] = Bytes_val( buf );
 
   jpeg_write_scanlines( cinfop, row, 1 );
   return Val_unit;
@@ -188,9 +189,9 @@ value close_jpeg_file_for_write( jpegh )
 
   DEBUGF( "closing\n");
 
-  cinfop = (struct jpeg_compress_struct *) Field( jpegh, 0 );
-  outfile = (FILE *) Field( jpegh, 1 );
-  jerrp = (struct my_error_mgr *) Field( jpegh, 2 );
+  cinfop = (struct jpeg_compress_struct *) Ptr_val(Field( jpegh, 0 ));
+  outfile = (FILE *) Ptr_val( Field( jpegh, 1 ) );
+  jerrp = (struct my_error_mgr *) Ptr_val( Field( jpegh, 2 ) );
 
   DEBUGF( "cinfop= %d outfile= %d %d %d \n", cinfop, outfile, cinfop->next_scanline, cinfop->image_height); 
 
@@ -208,5 +209,19 @@ value close_jpeg_file_for_write( jpegh )
 
   return Val_unit;
 }
+
+#else
+
+#include <caml/mlvalues.h>
+#include <caml/alloc.h>
+#include <caml/memory.h>
+#include <caml/fail.h>
+
+CAMLprim value open_jpeg_file_for_write_colorspace(){ failwith("unsupported"); }
+CAMLprim value open_jpeg_file_for_write(){ failwith("unsupported"); }
+CAMLprim value open_jpeg_file_for_write_cmyk(){ failwith("unsupported"); }
+CAMLprim value write_jpeg_scanline(){ failwith("unsupported"); }
+CAMLprim value close_jpeg_file_for_write(){ failwith("unsupported"); }
+CAMLprim void caml_jpeg_write_marker(){ failwith("unsupported"); }
 
 #endif // HAS_JPEG

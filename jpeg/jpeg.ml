@@ -28,11 +28,11 @@ module Marker = struct
     data : string
   }
 
-  type t = 
+  type t =
     | Comment of string
     | App of int * string
 
-  let t_of_raw r = 
+  let t_of_raw r =
     match r.code with
     | 0xFE -> Comment r.data
     | n -> App (n - 0xE0, r.data)
@@ -51,7 +51,7 @@ external open_in_header : string -> int * int * in_handle * Marker.raw list
     = "open_jpeg_file_for_read"
 external set_scale_denom : in_handle -> int -> unit
     = "jpeg_set_scale_denom"
-external open_in_start : in_handle -> int * int * in_handle
+external open_in_start : in_handle -> int * int
     = "open_jpeg_file_for_read_start"
 external read_scanline : in_handle -> bytes -> int -> unit
     = "read_jpeg_scanline"
@@ -66,7 +66,7 @@ external open_out : string -> int -> int -> int -> out_handle
     = "open_jpeg_file_for_write"
 external open_out_cmyk : string -> int -> int -> int -> out_handle
     = "open_jpeg_file_for_write_cmyk"
-external write_marker : out_handle -> Marker.raw -> unit 
+external write_marker : out_handle -> Marker.raw -> unit
   = "caml_jpeg_write_marker"
 external write_scanline : out_handle -> bytes -> unit
     = "write_jpeg_scanline"
@@ -75,7 +75,7 @@ external close_out : out_handle -> unit
 
 let open_in name =
   let _, _, ic, rev_markers = open_in_header name in
-  let w, h, ic = open_in_start ic in
+  let w, h = open_in_start ic in
   w, h, ic, List.rev_map Marker.t_of_raw rev_markers
 
 let open_in_thumbnail name geom_spec =
@@ -96,36 +96,37 @@ let open_in_thumbnail name geom_spec =
     if scale < 4 then 2 else
     if scale < 8 then 4 else 8 in
   set_scale_denom ic denom;
-  image_width, image_height, open_in_start ic, List.rev_map Marker.t_of_raw rev_markers
+  let w, h = open_in_start ic in
+  image_width, image_height, (w, h, ic), List.rev_map Marker.t_of_raw rev_markers
 
-let load_aux prog ic w h = 
-  let prog y = 
+let load_aux prog ic w h =
+  let prog y =
     match prog with
     | Some p -> p (float (y + 1) /. float h)
     | None -> ()
   in
   let img = Rgb24.create w h in
-  begin match Rgb24.get_scanline_ptr img with 
+  begin match Rgb24.get_scanline_ptr img with
   | Some f ->
       let load_once_at = max 1 (h / 10) in
       let rec load_scanlines y =
-	if y >= h then ()
-	else begin
-	  let (string, off), at_most = f y in
-	  let lines_read = min load_once_at at_most in
-	  read_scanlines ic string off lines_read;
-	  prog y;
-	  load_scanlines (y + lines_read)
-	end
+        if y >= h then ()
+        else begin
+          let (string, off), at_most = f y in
+          let lines_read = min load_once_at at_most in
+          read_scanlines ic string off lines_read;
+          prog y;
+          load_scanlines (y + lines_read)
+        end
       in
       load_scanlines 0
-  | None -> 
+  | None ->
       (* CR jfuruse: check overflow *)
       let scanline = Bytes.create (w * 3) in
       for y = 0 to h - 1 do
-	read_scanline ic scanline 0;
-	Rgb24.set_scanline img y scanline;
-	prog y
+        read_scanline ic scanline 0;
+        Rgb24.set_scanline img y scanline;
+        prog y
       done
   end;
   close_in ic;
@@ -280,10 +281,10 @@ let check_header filename =
       let w, h, infos =
         try
           let w, h, colormodel = find_jpeg_size_and_colormodel ic in
-          w, h, 
+          w, h,
           match colormodel with Some x -> [x] | None -> []
         with
-        | Not_found -> -1, -1, [] 
+        | Not_found -> -1, -1, []
       in
       Pervasives.close_in ic;
       { header_width = w;
@@ -296,7 +297,7 @@ let check_header filename =
       Pervasives.close_in ic;
       raise Wrong_file_type
 
-let read_markers filename = 
+let read_markers filename =
   let _, _, ic, rev_markers = open_in_header filename in
   close_in ic;
   List.rev_map Marker.t_of_raw rev_markers
@@ -309,4 +310,3 @@ let () = add_methods Jpeg
     save = Some save;
     load_sequence = None;
     save_sequence = None}
-

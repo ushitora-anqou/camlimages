@@ -42,8 +42,8 @@ module Configurator = struct
 
   let find_ocaml_package n =
     match Findlib.package_directory n with
-    | s -> 
-        (* findlib 1.7.3 installs META file for graphics 
+    | s ->
+        (* findlib 1.7.3 installs META file for graphics
            even when there is no graphics library installed. *)
         let dest = Caml.Filename.temp_file "test" ".cma" in
         let res = match Caml.Sys.command & !% "ocamlfind ocamlc -package %s -o %s -linkpkg" n dest with
@@ -106,53 +106,53 @@ module Make(A : sig val name : string end) = struct
                (sexp_of_list sexp_of_string package_conf.libs))
 
 
-  let pkcfg, pkg_config = 
+  let pkcfg, pkg_config =
     log "Checking pkg-config in $PATH... ";
     let pkcfg = Pkg_config.get t in
     (pkcfg,
      match pkcfg with
-     | None -> 
+     | None ->
          log "(not found)@.";
          Pkg_config None
-     | Some _p -> 
+     | Some _p ->
          log "(found)@.";
          Pkg_config (Some ())
     )
 
-  let find_program n = 
+  let find_program n =
     log "Checking program %s in $PATH... " n;
     match find_program n with
-    | None -> 
+    | None ->
         log "(not found)@.";
         Program None
-    | Some n -> 
+    | Some n ->
         log "(found : %s)@." n;
         Program (Some n)
 
-  let find_ocaml_program n = 
+  let find_ocaml_program n =
     log "Checking OCaml program %s in $PATH... " n;
     match find_ocaml_program n with
-    | None -> 
+    | None ->
         log "(not found)@.";
         Program None
-    | Some n -> 
+    | Some n ->
         log "(found : %s)@." n;
         Program (Some n)
 
-  let find_ocaml_package n = 
+  let find_ocaml_package n =
     log "Checking OCaml library %s... " n;
     match find_ocaml_package n with
-    | Some s -> 
+    | Some s ->
         log "(found : %s)@." s;
         OCamlLibrary (Some s)
-    | None -> 
+    | None ->
         log "(not found)@.";
         OCamlLibrary None
 
-  let by_pkg_config package () = 
+  let by_pkg_config package () =
     log "Checking pkg-config package %s... " package;
     match pkcfg with
-    | None -> 
+    | None ->
         log "(not found : needs pkg-config)@.";
         None
     | Some pkgcfg ->
@@ -169,18 +169,18 @@ module Make(A : sig val name : string end) = struct
     let headers = "stdio.h" :: headers in
     let includes = Caml.List.map (!% "#include <%s>") headers in
     let fcalls = Caml.List.map (!% "  ( (void(*)()) (%s) )();") fnames in
-    let code = 
-      String.concat ~sep:"\n" 
-      & includes 
+    let code =
+      String.concat ~sep:"\n"
+      & includes
         @ [ "int main(int argc, char **argv) {" ]
         @ fcalls
         @ [ "return 0; }"
           ; "\n"
           ]
     in
-    if 
-      c_test t 
-        ~c_flags 
+    if
+      c_test t
+        ~c_flags
         ~link_flags
         code
     then begin
@@ -218,14 +218,14 @@ module Make(A : sig val name : string end) = struct
 
   (* Configurator does not have #define X code... *)
   let path k o =
-    [ bool k o;  has k o ] @ 
-    match o with 
+    [ bool k o;  has k o ] @
+    match o with
     | Some p -> [ !% "PATH_%s" k, String p
                 (* ; !% "PATH_OPTION_%s" k, String (!% "(Some %s)" p) *) ]
     | None -> [ (* !% "PATH_OPTION_%s" k, String "None" *) ]
 
   let library k o =
-    [ bool k o;  has k o ] @ 
+    [ bool k o;  has k o ] @
     match o with
     | Some { libs; cflags } ->
         [ !% "CFLAGS_%s" k, String (String.concat ~sep:" " cflags )
@@ -235,12 +235,11 @@ module Make(A : sig val name : string end) = struct
 
   let make_header ~fname kitems =
     let kvs = List.concat_map kitems ~f:(fun (k,item) -> match item with
-        | Pkg_config o -> [ bool k o; has k o ] 
-        | File o 
-        | Program o 
+        | Pkg_config o -> [ bool k o; has k o ]
+        | File o
+        | Program o
         | OCamlLibrary o -> path k o
         | Library o -> library k o)
     in
     gen_header_file t ~fname kvs
 end
-

@@ -295,7 +295,7 @@ let colormap_parse cmap =
     if c.r < 0 then begin
       c.r <- 0; c.g <- 255; c.b <- 0;
       transparent := i;
-      prerr_endline (Printf.sprintf "transparent= %d" i);
+      (* prerr_endline (Printf.sprintf "transparent= %d" i); *)
     end
   done;
   cmap, !transparent

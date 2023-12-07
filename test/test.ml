@@ -34,7 +34,7 @@ let capabilities () =
   printf "*******************************************************@."
 
 let show_image img x y =
-  let img = 
+  let img =
     match img with
     | Rgba32 img -> Rgb24 (Rgb24.of_rgba32 img)
     | _ -> img
@@ -94,7 +94,7 @@ let images =
   Arg.parse [] (fun x -> images := x :: !images) "test images";
   if !images <> []
   then List.rev !images
-  else 
+  else
     let src_dir = (try Sys.getenv "srcdir" with Not_found -> ".") in
     let images_src_dir = Filename.concat src_dir "images" in
     List.map (fun x -> Filename.concat images_src_dir x) images_default

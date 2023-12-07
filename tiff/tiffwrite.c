@@ -13,6 +13,7 @@
 /***********************************************************************/
 
 #include "../config/config.h"
+#include "compat.h"
 
 #ifdef HAS_TIFF
 
@@ -42,55 +43,60 @@
 extern value *imglib_error;
 
 value open_tiff_file_for_write( value file,
-			        value width,
-			        value height,
-			        value resolution )
+                                value width,
+                                value height,
+                                value resolution )
 {
-  CAMLparam4(file,width,height,resolution);
-  int image_width;
-  int image_height;
-  double res;
-  TIFF* tif;
+    CAMLparam4(file,width,height,resolution);
 
-  image_width = Int_val( width );
-  image_height = Int_val( height );
-  res = Double_val( resolution );
+    int image_width;
+    int image_height;
+    double res;
+    TIFF* tif;
 
-  tif = TIFFOpen(String_val( file ), "w");
-  if( tif ){
-    /* needs */
-    /* Resolution */
-    /* FillOrder */
+    image_width = Int_val( width );
+    image_height = Int_val( height );
+    res = Double_val( resolution );
+
+    tif = TIFFOpen(String_val( file ), "w");
+    if( tif ){
+        /* needs */
+        /* Resolution */
+        /* FillOrder */
     
-    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, (uint32) image_width);
-    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, (uint32) image_height);
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 3);
-    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW); /* LZW */
-    TIFFSetField(tif, TIFFTAG_PREDICTOR, 2); /* ??? */
-    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, image_height); /* ??? */
+        TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, (uint32) image_width);
+        TIFFSetField(tif, TIFFTAG_IMAGELENGTH, (uint32) image_height);
+        TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+        TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 3);
+        TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 8);
+        TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+        TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW); /* LZW */
+        TIFFSetField(tif, TIFFTAG_PREDICTOR, 2); /* ??? */
+        TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+        TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, image_height); /* ??? */
 
-    TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
-    TIFFSetField(tif, TIFFTAG_XRESOLUTION, res);
-    TIFFSetField(tif, TIFFTAG_YRESOLUTION, res);
+        TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
+        TIFFSetField(tif, TIFFTAG_XRESOLUTION, res);
+        TIFFSetField(tif, TIFFTAG_YRESOLUTION, res);
 
-    CAMLreturn( (value) tif);
-  } else {
-    failwith("failed to open tiff file to write");
-  }
+        CAMLreturn( Val_ptr(tif) );
+    } else {
+        failwith("failed to open tiff file to write");
+    }
 }
 
-value write_tiff_scanline( tiffh, buf, row )
-     value tiffh;
+value write_tiff_scanline( vtiffh, buf, row )
+     value vtiffh;
      value buf;
      value row;
 {
-  CAMLparam3(tiffh,buf,row);
-  TIFFWriteScanline((TIFF*)tiffh, String_val(buf), Int_val(row), 0);
-  CAMLreturn(Val_unit);
+    CAMLparam3(vtiffh,buf,row);
+
+    TIFF *tiffh = Ptr_val(vtiffh);
+ 
+    TIFFWriteScanline(tiffh, Bytes_val(buf), Int_val(row), 0);
+
+    CAMLreturn(Val_unit);
 }
 
 #endif // HAS_TIFF

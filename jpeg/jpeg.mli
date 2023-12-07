@@ -19,7 +19,7 @@
 module Marker : sig
 
   (** Jpeg Marker such as EXIF *)
-  type t = 
+  type t =
     | Comment of string
     | App of int * string
 
@@ -32,14 +32,14 @@ end
 val load : string -> Images.load_option list -> Images.t
   (** Loads a jpeg image. *)
 
-val load_thumbnail : string -> Images.load_option list -> Geometry.spec -> 
+val load_thumbnail : string -> Images.load_option list -> Geometry.spec ->
   int * int * Images.t
-  (** JPEG image data is composed so that thumbnails of the size 1/2, 1/4 
+  (** JPEG image data is composed so that thumbnails of the size 1/2, 1/4
       and 1/8 of the original size can be loaded faster. [load_thumnail]
-      loads an JPEG image with the one of these scales and 1/1 which is 
+      loads an JPEG image with the one of these scales and 1/1 which is
       nearest and equal to or bigger than the given [Gemetry.spec].
   *)
-  (* CR jfuruse: we should have lower and more direct API to access 
+  (* CR jfuruse: we should have lower and more direct API to access
      scaled data *)
 
 val save : string -> Images.save_option list -> Images.t -> unit
@@ -49,7 +49,7 @@ val save : string -> Images.save_option list -> Images.t -> unit
 val save_with_markers : string -> Images.save_option list -> Images.t -> Marker.t list -> unit
   (** Same as [save] but it also writes markers *)
 
-val save_as_cmyk : string -> Images.save_option list -> 
+val save_as_cmyk : string -> Images.save_option list ->
   (Images.rgb -> int * int * int * int) -> Images.t -> unit
   (** Saves RGB24 image as a CMYK32 JPEG image, using the given
       color conversion function on the fly.  More efficient than
@@ -60,15 +60,15 @@ val save_cmyk_sample : string -> Images.save_option list -> unit
   (** Create CMYK jpeg image sample. Just for developpers. *)
 
 (** {1 Scanline based I/O functions } *)
-  
+
 type in_handle
   (** Scanline read handle *)
-  
+
 val open_in : string -> int * int * in_handle * Marker.t list
   (** [open_in path] opens a JPEG image [path] and returns its
       width, height, a handle to get scanlines, and the JPEG makers.
   *)
-  
+
 val open_in_thumbnail :
   string -> Geometry.spec -> int * int * (int * int * in_handle) * Marker.t list
   (** [open_in_thumbnail] is the same as [open_in] but possibly scales
@@ -78,11 +78,11 @@ val open_in_thumbnail :
 
 val read_scanline : in_handle -> bytes -> int -> unit
   (** [read_scanline h buf off] reads a scanline from the handle and store
-      in [bytes] at the offset [off]. (image's width * bytes_per_pixel) 
-      bytes are overwritten from [off] of [bytes]. No size check of [buf] 
+      in [bytes] at the offset [off]. (image's width * bytes_per_pixel)
+      bytes are overwritten from [off] of [bytes]. No size check of [buf]
       is performed.
   *)
-  
+
 val close_in : in_handle -> unit
   (** closes the given scanline handle *)
 
@@ -97,7 +97,7 @@ val open_out : string -> int -> int -> int -> out_handle
 
 val write_marker : out_handle -> Marker.t -> unit
   (** [write_marker h m] writes a maker to JPEG. It must be performed
-      before calling [write_scanline]. 
+      before calling [write_scanline].
   *)
 
 val write_scanline : out_handle -> bytes -> unit
@@ -111,7 +111,7 @@ val close_out : out_handle -> unit
   (** Close the write handle *)
 
 (** {1 Accessing the header information without touching the pixel data } *)
-  
+
 val check_header : string -> Images.header
   (** Checks the file header *)
 
