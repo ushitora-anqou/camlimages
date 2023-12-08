@@ -90,7 +90,7 @@ module type S = sig
   val add_colors : t map -> t list -> int list
   val find_nearest : t map -> t -> int
 end
-    
+
 module MakeMap(CM:COLORMODEL) = struct
   let size = (size : CM.t map -> int)
   let find_exact = (find_exact : CM.t map -> CM.t -> int)
@@ -185,7 +185,7 @@ module CmykModel = struct
   type t = {
     mutable c : int; mutable m : int; mutable y : int; mutable k : int;
   }
-       
+
   let square_distance c1 c2 =
     let dc = c1.c - c2.c
     and dm = c1.m - c2.m
@@ -299,3 +299,14 @@ let colormap_parse cmap =
     end
   done;
   cmap, !transparent
+
+let r3g3b2 =
+  { max = 255;
+    map = Array.init 256 (fun i ->
+        let f n i =
+          min 255 (int_of_float ((256. /. float (n-1)) *. float i))
+        in
+        { r = f 8 (i / 32);
+          g = f 8 ((i / 4) mod 8);
+          b = f 4 (i mod 4) })
+  }

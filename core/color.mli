@@ -40,7 +40,7 @@ val add_color : 'a map -> 'a -> int
        added again, and the corresponding color index is returned. *)
 
 val add_colors : 'a map -> 'a list -> int list
-    (** Add the list of new colors into the given colormap and return 
+    (** Add the list of new colors into the given colormap and return
        their indices. If a color is already in the colormap, it is not
        added again, and the corresponding color index is returned. *)
 
@@ -61,16 +61,16 @@ module type S = sig
 
   val square_distance : t -> t -> int
   (** Square distance of colors *)
-    
+
   val plus : t -> t -> t
   (** Adding colors.  No overflow is considered. *)
-    
+
   val minus : t -> t -> t
   (** Subtracting colors.  No underflow is considered. *)
-    
+
   val size : t map -> int
   (** size of the color map *)
-    
+
   val find_exact : t map -> t -> int
   (** Find the given color in the colormap and returns the color index.
       [Not_found] may be raised.
@@ -81,7 +81,7 @@ module type S = sig
       The function returns the color index for [c].
       It may raise [Too_many_colors].
   *)
-        
+
   val add_colors : t map -> t list -> int list
   (** [add_colors] is as same as [add_color] but it adds multiple colors *)
 
@@ -90,23 +90,23 @@ module type S = sig
       the nearest to [c].  The color distance is given by [square_distance].
   *)
 end
-    
+
 type rgb = { mutable r : int; mutable g : int; mutable b : int }
 (** R(ed), G(reen), B(lue) representation of colors. *)
 
 module Rgb : S with type t = rgb
 (** Colormap for RGB *)
-  
+
 type rgba = { color: rgb; mutable alpha : int; }
 (** RGB with alpha (transparent) information *)
 
 module Rgba : sig
   include S with type t = rgba
   val merge : t -> t -> t
-  (** [merge src dst] merges colors.  
+  (** [merge src dst] merges colors.
       If [src] is completely opaque it overrides [dst] completely.
       No overflow or underflow may happen. *)
-end                
+end
 (** Colormap for RGBA *)
 
 
@@ -133,7 +133,7 @@ val color_parse : string -> rgb
 
   It queries the name in the color name database given by the file
   [Camlimages.path_rgb_txt].  It also understands the following color format:
-  
+
     "#rrggbb"       where r,g and b are [0-9a-fA-F]
     "#rrrrggggbbbb" where r,g and b are [0-9a-fA-F]
 
@@ -147,3 +147,6 @@ val colormap_parse : string array -> rgb array * int
     it is considered transparent and replaced by r=0 g=255 b=0.
     The function returns the last transparent color index.
 *)
+
+val r3g3b2 : rgb map
+(** 256 color map using 3 bits for red, 3 bits for green and 2 bits for blue *)
