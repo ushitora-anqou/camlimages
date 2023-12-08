@@ -69,7 +69,6 @@ void my_error_exit (j_common_ptr cinfop)
 
   /* Always display the message. */
   /* We could postpone this until after returning, if we chose. */
-  fprintf(stderr,"setting libjpeg error message: \"%s\"\n", jpg_error_message);
   (*cinfop->err->format_message) (cinfop, jpg_error_message );
 
   /* Return control to the setjmp point */
