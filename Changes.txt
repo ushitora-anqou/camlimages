@@ -1,3 +1,7 @@
+5.0.5
+        - Fixes for OCaml 5;
+          https://v2.ocaml.org/manual/intfc.html#ss:c-outside-head
+
 5.0.4
 	- Typo fix of graphics/dune
 
