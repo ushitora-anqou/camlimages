@@ -8,6 +8,7 @@
    (language c)
    (names jpegread jpegwrite)
    (flags
+     :standard
      (:include ../config/jpeg_c_flags.sexp)))
  (c_library_flags
   (:include ../config/jpeg_c_library_flags.sexp)))

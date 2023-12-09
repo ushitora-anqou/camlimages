@@ -9,6 +9,7 @@
    (language c)
    (names xpmread xpmwrite)
    (flags
+     :standard
      (:include ../config/xpm_c_flags.sexp)))
  (c_library_flags     
   (:include ../config/xpm_c_library_flags.sexp)))

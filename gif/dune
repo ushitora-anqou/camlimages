@@ -1,3 +1,4 @@
+
 (library
  (name camlimages_gif)
  (public_name camlimages.gif)
@@ -8,6 +9,7 @@
    (language c)
    (names gifread gifwrite)
    (flags
+     :standard
      (:include ../config/gif_c_flags.sexp)))
  (c_library_flags
   (:include ../config/gif_c_library_flags.sexp)))

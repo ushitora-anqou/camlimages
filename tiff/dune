@@ -8,6 +8,7 @@
    (language c)
    (names tiffwrite tiffread)
    (flags
+     :standard
      (:include ../config/tiff_c_flags.sexp)))
  (c_library_flags
   (:include ../config/tiff_c_library_flags.sexp)))

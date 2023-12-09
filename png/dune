@@ -9,6 +9,7 @@
    (language c)
    (names pngread pngwrite)
    (flags
+     :standard
      (:include ../config/png_c_flags.sexp)))
  (c_library_flags
   (:include ../config/png_c_library_flags.sexp)))
