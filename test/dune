@@ -10,11 +10,11 @@
 ;  (libraries camlimages.core camlimages.gif camlimages.jpeg camlimages.png
 ;    camlimages.tiff camlimages.xpm camlimages.graphics camlimages.freetype))
 
-(test
- (name loadimages)
- (modules loadimages)
- (libraries camlimages.core camlimages.gif camlimages.jpeg camlimages.png
-  camlimages.tiff camlimages.xpm camlimages.freetype))
+(executable
+  (name loadimages)
+  (modules loadimages)
+  (libraries camlimages.core camlimages.gif camlimages.jpeg camlimages.png
+   camlimages.tiff camlimages.xpm camlimages.freetype))
 
 (test
  (name jpgmark)
@@ -26,7 +26,7 @@
  (modules jpgexif)
  (libraries camlimages.core camlimages.jpeg camlimages.exif))
 
-(test
+(executable
  (name dyn)
  (modules dyn)
  (libraries camlimages.core dynlink))
