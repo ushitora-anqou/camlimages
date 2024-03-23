@@ -1,3 +1,5 @@
+# This is a fork of [camlimages hosted by camlspotter on gitlab.com](https://gitlab.com/camlspotter/camlimages).
+
 ========================================================
 CamlImages - Objective Caml image processing library
 ========================================================
