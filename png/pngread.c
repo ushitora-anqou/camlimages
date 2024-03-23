@@ -282,9 +282,8 @@ value read_png_file( name )
 
     png_read_update_info(png_ptr, info_ptr);
 
-    // No need to call it again, I believe.
-    // png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,
-    //                 &interlace_type, NULL, NULL);
+    png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,
+                    &interlace_type, NULL, NULL);
 
     rowbytes = png_get_rowbytes(png_ptr, info_ptr);
 
