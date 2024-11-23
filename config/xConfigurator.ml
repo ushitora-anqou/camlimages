@@ -8,6 +8,8 @@ let (!%) fmt = Printf.sprintf fmt
 module Configurator = struct
   include Configurator.V1
 
+  module Caml = Stdlib
+
   let ( ^/ ) = Caml.Filename.concat
 
   let path_sep =
